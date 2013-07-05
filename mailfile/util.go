@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	iconv "github.com/djimenez/iconv-go"
 	"io"
 	"io/ioutil"
 	"strconv"
@@ -37,9 +38,6 @@ func DecodeRFC2047Word(s string) (string, error) {
 		return "", errors.New("mail: address not RFC 2047 encoded")
 	}
 	charset, enc := strings.ToLower(fields[1]), strings.ToLower(fields[2])
-	if charset != "iso-8859-1" && charset != "utf-8" {
-		return "", fmt.Errorf("mail: charset not supported: %q", charset)
-	}
 
 	in := bytes.NewBufferString(fields[3])
 	var r io.Reader
@@ -66,6 +64,18 @@ func DecodeRFC2047Word(s string) (string, error) {
 		return b.String(), nil
 	case "utf-8":
 		return string(dec), nil
+	default:
+		buf := &bytes.Buffer{}
+		writer, err := iconv.NewWriter(buf, charset, "utf-8")
+		if err != nil {
+			return "", err
+		}
+		_, err = writer.Write(dec)
+		if err != nil {
+			return "", err
+		}
+
+		return buf.String(), nil
 	}
 	panic("unreachable")
 }

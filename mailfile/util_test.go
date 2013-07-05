@@ -17,3 +17,17 @@ func TestDecodeRFC2047String(t *testing.T) {
 		t.Fatalf("expected %s, got %s", expected, result)
 	}
 }
+
+func TestDecodeRFC2047StringWithBig5(t *testing.T) {
+	original := "=?BIG5?Q?=B2=C41717=A6^JWorld=AAZ=B9D=A4j=B7|-=A4C=C0s=AF]=A6A=B2{!=3F?="
+	expected := "第1717回JWorld武道大會-七龍珠再現!?"
+
+	result, err := DecodeRFC2047String(original)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expected != result {
+		t.Fatalf("expected %s, got %s", expected, result)
+	}
+}

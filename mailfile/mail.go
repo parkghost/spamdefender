@@ -2,10 +2,13 @@ package mailfile
 
 import (
 	"bytes"
+	iconv "github.com/djimenez/iconv-go"
 	"net/mail"
+	"strings"
 )
 
 // TODO: write unit-test for To and From methods
+// THINK: From and To support multi-charset
 
 type Mail interface {
 	Name() string
@@ -29,12 +32,25 @@ func parseToAddress(message *mail.Message) ([]*mail.Address, error) {
 	return mail.ParseAddressList(message.Header.Get("To"))
 }
 
-func parseBoby(message *mail.Message) (string, error) {
-	bodyContent := &bytes.Buffer{}
-	_, err := bodyContent.ReadFrom(message.Body)
+func parseBoby(message *mail.Message) (text string, err error) {
+	contentType := message.Header.Get("Content-Type")
+	idx := strings.LastIndex(contentType, "=")
+	charset := contentType[idx+1:]
 
-	if err != nil {
-		return "", err
+	reader := message.Body
+	if charset != "UTF-8" {
+		reader, err = iconv.NewReader(message.Body, charset, "UTF-8")
+		if err != nil {
+			return
+		}
 	}
-	return bodyContent.String(), nil
+
+	bodyContent := &bytes.Buffer{}
+	_, err = bodyContent.ReadFrom(reader)
+	if err != nil {
+		return
+	}
+
+	text = bodyContent.String()
+	return
 }
