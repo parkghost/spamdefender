@@ -33,7 +33,7 @@ var testData = []struct {
 }
 
 func main() {
-	an, err := analyzer.NewAnalyzer(traningDataFilePath, dictFilePath)
+	anlz, err := analyzer.NewAnalyzer(traningDataFilePath, dictFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -60,20 +60,24 @@ func main() {
 
 			mailFilePath := item.folder + ps + fi.Name()
 			mail := mailfile.NewPOP3Mail(mailFilePath)
+			if err = mail.Parse(); err != nil {
+				log.Fatal(err)
+			}
+
 			htmlText := mail.Content()
 			content, err := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
 			if err != nil {
 				//ignore mail like Java Developer Day
 			}
 
-			score, pass := an.Test(content)
+			score, pass := anlz.Test(content)
 			testConfident := math.Abs(score[0]/score[1] - 1)
 
 			if testConfident < confident {
 				msg := fmt.Sprintf("%s, %s, %f\n", mail.Subject(), mailFilePath, testConfident)
 				fmt.Printf(ansi.Color(msg, "cyan+b"))
 				if explain {
-					fmt.Println(an.Explain(content))
+					fmt.Println(anlz.Explain(content))
 				}
 			} else {
 				totalConfident += 1
@@ -84,7 +88,7 @@ func main() {
 					msg := fmt.Sprintf("%s, %s, %f\n", mail.Subject(), mailFilePath, testConfident)
 					fmt.Printf(ansi.Color(msg, "red+b"))
 					if explain {
-						fmt.Println(an.Explain(content))
+						fmt.Println(anlz.Explain(content))
 					}
 				}
 			}

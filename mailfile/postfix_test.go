@@ -14,7 +14,14 @@ var postfixTestdata = Testdata{
 func TestPostfixRetrieveSubject(t *testing.T) {
 	mail := NewPostfixMail(postfixTestdata.source)
 	f, err := os.Open(postfixTestdata.plainSource)
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer f.Close()
+
+	if err = mail.Parse(); err != nil {
+		t.Fatal(err)
+	}
 
 	reader := NewPlainSourceReader(f)
 	subject, err := reader.ReadLine()
@@ -30,8 +37,12 @@ func TestPostfixRetrieveSubject(t *testing.T) {
 func TestPostfixRetrieveContent(t *testing.T) {
 	mail := NewPostfixMail(postfixTestdata.source)
 	f, err := os.Open(postfixTestdata.plainSource)
-	defer f.Close()
 	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	if err = mail.Parse(); err != nil {
 		t.Fatal(err)
 	}
 

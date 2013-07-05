@@ -54,6 +54,10 @@ func main() {
 
 			filePath := item.folder + string(os.PathSeparator) + fi.Name()
 			mail := mailfile.NewPOP3Mail(filePath)
+			if err = mail.Parse(); err != nil {
+				log.Fatal(err)
+			}
+
 			htmlText := mail.Content()
 			content, _ := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
 

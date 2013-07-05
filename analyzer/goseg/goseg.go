@@ -166,11 +166,10 @@ func NewTokenizer(dicPath string) (*Tokenizer, error) {
 	var min_freq float32 = 0.0
 
 	file, err := os.Open(dicPath)
-	defer file.Close()
-
 	if err != nil {
 		return nil, err
 	}
+	defer file.Close()
 
 	var content []byte
 	content, err = ioutil.ReadAll(file)

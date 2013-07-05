@@ -2,9 +2,9 @@ package mailfile
 
 import (
 	"bytes"
-	"io"
 	"net/mail"
 	"os/exec"
+	"path"
 )
 
 var (
@@ -13,30 +13,39 @@ var (
 )
 
 type PostfixMail struct {
-	parsed   bool
 	filePath string
 	subject  string
 	content  string
+	from     *mail.Address
+	to       []*mail.Address
+}
+
+func (m *PostfixMail) Name() string {
+	_, name := path.Split(m.filePath)
+	return name
+}
+
+func (m *PostfixMail) Path() string {
+	return m.filePath
 }
 
 func (m *PostfixMail) Subject() string {
-	if !m.parsed {
-		m.parse()
-	}
-
 	return m.subject
 }
 
 func (m *PostfixMail) Content() string {
-	if !m.parsed {
-		m.parse()
-	}
-
 	return m.content
 }
 
-func (m *PostfixMail) parse() (err error) {
+func (m *PostfixMail) From() *mail.Address {
+	return m.from
+}
 
+func (m *PostfixMail) To() []*mail.Address {
+	return m.to
+}
+
+func (m *PostfixMail) Parse() (err error) {
 	cmd := &exec.Cmd{}
 	cmdBuf := &bytes.Buffer{}
 
@@ -54,20 +63,31 @@ func (m *PostfixMail) parse() (err error) {
 		return
 	}
 
-	rawSubjectStr := message.Header.Get("Subject")
-
-	m.subject, err = DecodeRFC2047String(rawSubjectStr)
+	m.subject, err = parseSubject(message)
 	if err != nil {
 		return
 	}
 
-	bodyContent := &bytes.Buffer{}
-	io.Copy(bodyContent, message.Body)
-	m.content = bodyContent.String()
+	m.from, err = parseFromAddress(message)
+	if err != nil {
+		return
+	}
 
-	m.parsed = true
+	m.to, err = parseToAddress(message)
+	if err != nil {
+		return
+	}
+
+	m.content, err = parseBoby(message)
+	if err != nil {
+		return
+	}
 
 	return
+}
+
+func (m *PostfixMail) String() string {
+	return m.filePath
 }
 
 func NewPostfixMail(filePath string) Mail {

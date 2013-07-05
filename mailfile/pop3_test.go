@@ -9,11 +9,6 @@ import (
 	"testing"
 )
 
-type Testdata struct {
-	source      string
-	plainSource string
-}
-
 type plainSourceReader struct {
 	reader *bufio.Reader
 }
@@ -42,6 +37,11 @@ func NewPlainSourceReader(reader io.Reader) *plainSourceReader {
 	return &plainSourceReader{bufio.NewReader(reader)}
 }
 
+type Testdata struct {
+	source      string
+	plainSource string
+}
+
 var pop3Testdata = Testdata{
 	"testdata" + string(os.PathSeparator) + "pop3",
 	"testdata" + string(os.PathSeparator) + "pop3_plain",
@@ -50,7 +50,14 @@ var pop3Testdata = Testdata{
 func TestPOP3RetrieveSubject(t *testing.T) {
 	mail := NewPOP3Mail(pop3Testdata.source)
 	f, err := os.Open(pop3Testdata.plainSource)
+	if err != nil {
+		t.Fatal(err)
+	}
 	defer f.Close()
+
+	if err = mail.Parse(); err != nil {
+		t.Fatal(err)
+	}
 
 	reader := NewPlainSourceReader(f)
 	subject, err := reader.ReadLine()
@@ -66,8 +73,12 @@ func TestPOP3RetrieveSubject(t *testing.T) {
 func TestPOP3RetrieveContent(t *testing.T) {
 	mail := NewPOP3Mail(pop3Testdata.source)
 	f, err := os.Open(pop3Testdata.plainSource)
-	defer f.Close()
 	if err != nil {
+		t.Fatal(err)
+	}
+	defer f.Close()
+
+	if err = mail.Parse(); err != nil {
 		t.Fatal(err)
 	}
 

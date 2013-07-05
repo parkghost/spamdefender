@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"github.com/jbrukh/bayesian"
 	"github.com/mgutz/ansi"
-	"io"
 	"io/ioutil"
 	"log"
 	"math"
 	"os"
 	"spamdefender/analyzer"
+	"spamdefender/common"
 	"spamdefender/html"
 	"spamdefender/mailfile"
 )
@@ -33,7 +33,7 @@ var (
 )
 
 func main() {
-	an, err := analyzer.NewAnalyzer(traningDataFilePath, dictFilePath)
+	anlz, err := analyzer.NewAnalyzer(traningDataFilePath, dictFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -52,33 +52,37 @@ func main() {
 
 		filePath := mailbox + ps + fi.Name()
 		mail := mailfile.NewPOP3Mail(filePath)
+		if err = mail.Parse(); err != nil {
+			log.Fatal(err)
+		}
+
 		htmlText := mail.Content()
 		content, err := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
 		if err != nil {
 			fmt.Println(err)
 		}
 
-		score, pass := an.Test(content)
+		score, pass := anlz.Test(content)
 
 		color := ""
 		if math.Abs(score[0]/score[1]-1) < confident {
 			color = "cyan+b"
 			neutrals += 1
 			if !dryRun {
-				CopyFile(filePath, "neutral"+ps+fi.Name())
+				common.CopyFile(filePath, "neutral"+ps+fi.Name())
 			}
 		} else {
 			if pass {
 				color = "green+b"
 				goods += 1
 				if !dryRun {
-					CopyFile(filePath, "good"+ps+fi.Name())
+					common.CopyFile(filePath, "good"+ps+fi.Name())
 				}
 			} else {
 				color = "red+b"
 				bads += 1
 				if !dryRun {
-					CopyFile(filePath, "bad"+ps+fi.Name())
+					common.CopyFile(filePath, "bad"+ps+fi.Name())
 				}
 			}
 		}
@@ -95,25 +99,4 @@ func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-func CopyFile(src, dst string) error {
-	srcFile, err := os.Open(src)
-	defer srcFile.Close()
-	if err != nil {
-		return err
-	}
-
-	dstFile, err := os.OpenFile(dst, os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0644)
-	if err != nil {
-		return err
-	}
-	defer dstFile.Close()
-
-	_, err = io.Copy(dstFile, srcFile)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }

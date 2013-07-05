@@ -22,9 +22,10 @@ func BannerRemover(lineSeparator string, skipTop int, skipBottom int) func(strin
 		}
 
 		if len(pos) == 0 {
-			return text, errors.New("html: cannot detect lineSeparator")
+			return text, errors.New(fmt.Sprintf("html: cannot detect lineSeparator: %s", lineSeparator))
 		}
 
+		// TODO: extract parameter
 		if len(pos) != 3 {
 			return text, errors.New("html: malformed mail content")
 		}

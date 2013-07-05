@@ -31,7 +31,7 @@ var testData = []struct {
 }
 
 func main() {
-	an, err := analyzer.NewAnalyzer(traningDataFilePath, dictFilePath)
+	anlz, err := analyzer.NewAnalyzer(traningDataFilePath, dictFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -58,13 +58,17 @@ func main() {
 
 			mailFilePath := item.folder + ps + fi.Name()
 			mail := mailfile.NewPOP3Mail(mailFilePath)
+			if err = mail.Parse(); err != nil {
+				log.Fatal(err)
+			}
+
 			htmlText := mail.Content()
 			content, err := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
 			if err != nil {
 				//ignore mail like Java Developer Day
 			}
 
-			score, pass := an.Test(content)
+			score, pass := anlz.Test(content)
 
 			if math.Abs(score[0]/score[1]-1) > confident {
 				totalConfident += 1

@@ -1,36 +1,46 @@
 package mailfile
 
 import (
-	"bytes"
-	"io"
 	"net/mail"
 	"os"
+	"path"
 )
 
 type POP3Mail struct {
-	parsed   bool
 	filePath string
 	subject  string
 	content  string
+	from     *mail.Address
+	to       []*mail.Address
+}
+
+func (m *POP3Mail) Name() string {
+	_, name := path.Split(m.filePath)
+	return name
+}
+
+func (m *POP3Mail) Path() string {
+	return m.filePath
 }
 
 func (m *POP3Mail) Subject() string {
-	if !m.parsed {
-		m.parse()
-	}
-
 	return m.subject
 }
 
 func (m *POP3Mail) Content() string {
-	if !m.parsed {
-		m.parse()
-	}
-
 	return m.content
 }
 
-func (m *POP3Mail) parse() (err error) {
+func (m *POP3Mail) From() *mail.Address {
+	return m.from
+}
+
+func (m *POP3Mail) To() []*mail.Address {
+	return m.to
+}
+
+func (m *POP3Mail) Parse() (err error) {
+
 	fs, err := os.Open(m.filePath)
 	if err != nil {
 		return
@@ -42,20 +52,31 @@ func (m *POP3Mail) parse() (err error) {
 		return
 	}
 
-	rawSubjectStr := message.Header.Get("Subject")
-
-	m.subject, err = DecodeRFC2047String(rawSubjectStr)
+	m.subject, err = parseSubject(message)
 	if err != nil {
 		return
 	}
 
-	bodyContent := &bytes.Buffer{}
-	io.Copy(bodyContent, message.Body)
-	m.content = bodyContent.String()
+	m.from, err = parseFromAddress(message)
+	if err != nil {
+		return
+	}
 
-	m.parsed = true
+	m.to, err = parseToAddress(message)
+	if err != nil {
+		return
+	}
+
+	m.content, err = parseBoby(message)
+	if err != nil {
+		return
+	}
 
 	return
+}
+
+func (m *POP3Mail) String() string {
+	return m.filePath
 }
 
 func NewPOP3Mail(filePath string) Mail {
