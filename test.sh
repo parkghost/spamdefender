@@ -15,7 +15,7 @@ go test -v -test.run=".*POP3|.*RFC2047"
 popd >/dev/null 
 
 # no tests, but a build is something
-echo "build spamdefender"
+echo "build github.com/parkghost/spamdefender"
 go build
 go clean
 

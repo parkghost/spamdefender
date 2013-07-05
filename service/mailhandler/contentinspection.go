@@ -1,11 +1,11 @@
 package mailhandler
 
 import (
+	"github.com/parkghost/spamdefender/analyzer"
+	"github.com/parkghost/spamdefender/common"
+	"github.com/parkghost/spamdefender/html"
+	"github.com/parkghost/spamdefender/mailfile"
 	"log"
-	"spamdefender/analyzer"
-	"spamdefender/common"
-	"spamdefender/html"
-	"spamdefender/mailfile"
 )
 
 type ContentInspectionMailHandler struct {

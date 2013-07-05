@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/jbrukh/bayesian"
-	"spamdefender/analyzer/goseg"
-	"spamdefender/common"
+	"github.com/parkghost/spamdefender/analyzer/goseg"
+	"github.com/parkghost/spamdefender/common"
 )
 
 const (

@@ -1,9 +1,9 @@
 package main
 
 import (
+	"github.com/parkghost/spamdefender/service"
+	mh "github.com/parkghost/spamdefender/service/mailhandler"
 	"os"
-	"spamdefender/service"
-	mh "spamdefender/service/mailhandler"
 	"time"
 )
 

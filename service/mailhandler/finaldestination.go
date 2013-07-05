@@ -1,9 +1,9 @@
 package mailhandler
 
 import (
+	"github.com/parkghost/spamdefender/common"
+	"github.com/parkghost/spamdefender/mailfile"
 	"log"
-	"spamdefender/common"
-	"spamdefender/mailfile"
 )
 
 type FinalDestinationMailHandler struct {

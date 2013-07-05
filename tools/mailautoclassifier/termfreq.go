@@ -2,13 +2,13 @@ package main
 
 import (
 	"bufio"
+	"github.com/parkghost/spamdefender/analyzer/goseg"
+	"github.com/parkghost/spamdefender/html"
+	"github.com/parkghost/spamdefender/mailfile"
 	"io/ioutil"
 	"log"
 	"os"
 	"sort"
-	"spamdefender/analyzer/goseg"
-	"spamdefender/html"
-	"spamdefender/mailfile"
 	"strconv"
 	"strings"
 )

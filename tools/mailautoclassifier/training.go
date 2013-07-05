@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 	"github.com/jbrukh/bayesian"
+	"github.com/parkghost/spamdefender/analyzer/goseg"
+	"github.com/parkghost/spamdefender/common"
 	"io/ioutil"
 	"log"
 	"os"
-	"spamdefender/analyzer/goseg"
-	"spamdefender/common"
 )
 
 const ps = string(os.PathSeparator)

@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 	"github.com/mgutz/ansi"
+	"github.com/parkghost/spamdefender/analyzer"
+	"github.com/parkghost/spamdefender/common"
+	"github.com/parkghost/spamdefender/html"
+	"github.com/parkghost/spamdefender/mailfile"
 	"io/ioutil"
 	"log"
 	"math"
 	"os"
-	"spamdefender/analyzer"
-	"spamdefender/common"
-	"spamdefender/html"
-	"spamdefender/mailfile"
 	"time"
 )
 

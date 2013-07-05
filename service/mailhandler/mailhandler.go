@@ -1,10 +1,10 @@
 package mailhandler
 
 import (
+	"github.com/parkghost/spamdefender/mailfile"
+	"github.com/parkghost/spamdefender/service"
 	"log"
 	"os"
-	"spamdefender/mailfile"
-	"spamdefender/service"
 )
 
 // THINK: a better chaining structure to avoid lost mail

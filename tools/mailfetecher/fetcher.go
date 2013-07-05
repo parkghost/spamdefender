@@ -6,11 +6,11 @@ import (
 	"crypto/tls"
 	"fmt"
 	pop3 "github.com/d3xter/GoPOP3"
+	"github.com/parkghost/spamdefender/common"
 	"io/ioutil"
 	"log"
 	"net/mail"
 	"os"
-	"spamdefender/common"
 	"strconv"
 	"strings"
 )
