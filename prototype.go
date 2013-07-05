@@ -2,8 +2,8 @@ package main
 
 import (
 	"os"
-	"spamdefender/app"
-	mh "spamdefender/app/mailhandler"
+	"spamdefender/service"
+	mh "spamdefender/service/mailhandler"
 	"time"
 )
 
@@ -27,7 +27,6 @@ var (
 )
 
 func main() {
-
 	contentInspection := mh.NewContentInspection(allPass, quarantineFolder, traningDataFilePath, dictFilePath)
 	sendOutOnly := mh.NewSendOutOnly(localDomain, incomingFolder)
 	matchedSubject := mh.NewMatchedSubject(subjectPrefix, incomingFolder)
@@ -36,7 +35,7 @@ func main() {
 	handlerChain := mh.NewHandlerChain(sendOutOnly, matchedSubject, contentInspection, finalDestination)
 	handler := mh.NewMailHandlerAdapter(handlerChain)
 
-	monitor := app.NewFolderMonitor(holdFolder, time.Duration(1)*time.Second, handler)
+	monitor := service.NewFolderMonitor(holdFolder, time.Duration(1)*time.Second, handler)
 	monitor.Start()
 
 	<-quit

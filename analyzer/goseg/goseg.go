@@ -1,9 +1,9 @@
 package goseg
 
 /*
-forked from https://github.com/fxsjy/goseg and removed code of artificial neural network for performance
+forked from https://github.com/fxsjy/goseg
+removed artificial neural network for speedup
 */
-
 import (
 	"io/ioutil"
 	"os"
@@ -159,37 +159,39 @@ func (tk *Tokenizer) calc(sentence []rune, DAG map[int][]int, idx int, route map
 
 }
 
-func NewTokenizer(dicPath string) (*Tokenizer, error) {
-
+func NewTokenizer(dictionaries ...string) (*Tokenizer, error) {
 	trie := new_trie_node()
 	freq_table := make(map[string]float32)
 	var min_freq float32 = 0.0
 
-	file, err := os.Open(dicPath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
+	for _, dict := range dictionaries {
+		file, err := os.Open(dict)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
 
-	var content []byte
-	content, err = ioutil.ReadAll(file)
-	if err != nil {
-		return nil, err
+		var content []byte
+		content, err = ioutil.ReadAll(file)
+		if err != nil {
+			return nil, err
+		}
+
+		var content_str string
+		content_str = string(content)
+		var lines []string
+		lines = strings.Split(content_str, "\n")
+		for _, line := range lines {
+			var word string = ""
+			var freq int = 0
+			tup := strings.Split(line, " ")
+			word = tup[0]
+			freq, _ = strconv.Atoi(tup[1])
+			add_string(trie, word)
+			freq_table[word] = float32(freq)
+		}
 	}
 
-	var content_str string
-	content_str = string(content)
-	var lines []string
-	lines = strings.Split(content_str, "\n")
-	for _, line := range lines {
-		var word string = ""
-		var freq int = 0
-		tup := strings.Split(line, " ")
-		word = tup[0]
-		freq, _ = strconv.Atoi(tup[1])
-		add_string(trie, word)
-		freq_table[word] = float32(freq)
-	}
 	min_freq, freq_table = normalize(freq_table)
 
 	return &Tokenizer{trie, freq_table, min_freq}, nil

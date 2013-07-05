@@ -33,13 +33,12 @@ type WordFreq struct {
 }
 
 func (wf *WordFreq) String() string {
+	visible := false
 	buf := bytes.NewBufferString(wf.Word)
-
-	outputFreqsText := false
 	freqsText := bytes.NewBufferString("(")
 	for c, v := range wf.FreqMatrix {
 		if v > 0.0000001 {
-			outputFreqsText = true
+			visible = true
 		}
 
 		if c == 0 {
@@ -50,7 +49,7 @@ func (wf *WordFreq) String() string {
 	}
 	freqsText.WriteString(")")
 
-	if outputFreqsText {
+	if visible {
 		freqsText.WriteTo(buf)
 	}
 
@@ -76,18 +75,16 @@ func (wfl WordFreqList) String() string {
 func (a *Analyzer) Explain(text string) WordFreqList {
 	words := a.tokenizer.Cut([]rune(text))
 	normalizedWords := common.Normalize(words, cutset)
-	freqMatrix := a.classifier.WordFrequencies(normalizedWords)
 
+	freqMatrix := a.classifier.WordFrequencies(normalizedWords)
 	wordFreqs := make([]WordFreq, len(normalizedWords))
 
 	for i, _ := range normalizedWords {
-		wordFreqMatrix := make([]float64, len(a.classifier.Classes))
-
+		wordFreq := make([]float64, len(a.classifier.Classes))
 		for j, _ := range a.classifier.Classes {
-			wordFreqMatrix[j] = freqMatrix[j][i]
+			wordFreq[j] = freqMatrix[j][i]
 		}
-
-		wordFreqs[i] = WordFreq{normalizedWords[i], wordFreqMatrix}
+		wordFreqs[i] = WordFreq{normalizedWords[i], wordFreq}
 	}
 
 	return wordFreqs

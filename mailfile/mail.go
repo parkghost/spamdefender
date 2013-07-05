@@ -33,9 +33,9 @@ func parseToAddress(message *mail.Message) ([]*mail.Address, error) {
 }
 
 func parseBoby(message *mail.Message) (text string, err error) {
+	//Content-Type: text/html;charset=UTF-8
 	contentType := message.Header.Get("Content-Type")
-	idx := strings.LastIndex(contentType, "=")
-	charset := contentType[idx+1:]
+	charset := contentType[strings.LastIndex(contentType, "=")+1:]
 
 	reader := message.Body
 	if charset != "UTF-8" {

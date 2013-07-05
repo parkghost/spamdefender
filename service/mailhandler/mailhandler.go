@@ -3,8 +3,8 @@ package mailhandler
 import (
 	"log"
 	"os"
-	"spamdefender/app"
 	"spamdefender/mailfile"
+	"spamdefender/service"
 )
 
 // THINK: a better chaining structure to avoid lost mail
@@ -52,6 +52,6 @@ func (mha *MailHandlerAdapter) Handle(filePath string) {
 	mha.handler.Handle(mail)
 }
 
-func NewMailHandlerAdapter(handler MailHandler) app.Handler {
+func NewMailHandlerAdapter(handler MailHandler) service.Handler {
 	return &MailHandlerAdapter{handler}
 }
