@@ -16,8 +16,6 @@ popd >/dev/null
 
 # no tests, but a build is something
 echo "build spamdefender"
-go build
-go clean
 
 echo "build tools"
 pushd tools >/dev/null
