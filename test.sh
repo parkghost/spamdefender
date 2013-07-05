@@ -2,40 +2,41 @@
 set -e
 # a helper script to run tests in the appropriate directories
 
-for dir in html mailfile; do
+for dir in html ; do
     echo "testing $dir"
     pushd $dir >/dev/null
     go test -test.v -timeout 15s
     popd >/dev/null
 done
 
+echo "testing mailfile"
+pushd mailfile >/dev/null
+go test -v -test.run=".*POP3|.*RFC2047"
+popd >/dev/null
+
 # no tests, but a build is something
+echo "build spamdefender"
 go build
-rm spamdefender
+go clean
 
 echo "build tools"
 pushd tools >/dev/null
-go build testing.go
-rm testing
-go build training.go
-rm training
+go build testing.go 
+go build training.go 
+go clean
 
 echo "build mailfetcher"
 pushd mailfetecher >/dev/null
 go build fetcher.go
-rm fetcher
+go clean
 popd >/dev/null
 
 echo "build mailautoclassifier"
 pushd mailautoclassifier >/dev/null
 go build classifier.go
-rm classifier
 go build explain.go
-rm explain
 go build termfreq.go
-rm termfreq
 go build training.go
-rm training
+go clean
 popd >/dev/null
-
 popd >/dev/null 
