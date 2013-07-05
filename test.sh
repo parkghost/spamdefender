@@ -12,10 +12,10 @@ done
 echo "testing mailfile"
 pushd mailfile >/dev/null
 go test -v -test.run=".*POP3|.*RFC2047"
-popd >/dev/null
+popd >/dev/null 
 
 # no tests, but a build is something
-echo "build spamdefender"
+
 
 echo "build tools"
 pushd tools >/dev/null
