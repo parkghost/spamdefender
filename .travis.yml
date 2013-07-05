@@ -2,7 +2,10 @@ language: go
 go:
   - 1.1.1
 install:
-  - go get
+  - go get github.com/jbrukh/bayesian
+  - go get github.com/djimenez/iconv-go
+  - go get github.com/d3xter/GoPOP3
+  - go get github.com/mgutz/ansi
 script:
   - pushd $TRAVIS_BUILD_DIR
   - ./test.sh
