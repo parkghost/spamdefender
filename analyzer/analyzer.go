@@ -90,16 +90,15 @@ func (a *Analyzer) Explain(text string) WordFreqList {
 	return wordFreqs
 }
 
-func NewAnalyzer(traningDataFilePath, dictFilePath string) (*Analyzer, error) {
+func NewAnalyzer(traningDataFilePath string, dictFilePath ...string) (*Analyzer, error) {
 	classifier, err := bayesian.NewClassifierFromFile(traningDataFilePath)
 	if err != nil {
 		return nil, err
 	}
 
-	tokenizer, err := goseg.NewTokenizer(dictFilePath)
+	tokenizer, err := goseg.NewTokenizer(dictFilePath...)
 	if err != nil {
 		return nil, err
 	}
-
 	return &Analyzer{classifier, tokenizer}, nil
 }
