@@ -12,18 +12,23 @@ import (
 )
 
 func DecodeRFC2047String(s string) (string, error) {
+
 	lines := strings.Split(s, " ")
 
-	joinLines := ""
+	buf := bytes.NewBufferString("")
 	for _, line := range lines {
-		word, err := DecodeRFC2047Word(line)
-		if err != nil {
-			return "", err
+		if strings.HasPrefix(line, "=?") {
+			word, err := DecodeRFC2047Word(line)
+			if err != nil {
+				return "", err
+			}
+			buf.WriteString(word)
+		} else {
+			buf.WriteString(" " + line)
 		}
-		joinLines += word
 	}
 
-	return joinLines, nil
+	return buf.String(), nil
 }
 
 func DecodeRFC2047Word(s string) (string, error) {
