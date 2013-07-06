@@ -37,7 +37,6 @@ loop:
 			}
 
 			for _, fi := range fis {
-
 				log.Println("Found Mail:", m.folder+ps+fi.Name())
 				m.handler.Handle(m.folder + ps + fi.Name())
 			}

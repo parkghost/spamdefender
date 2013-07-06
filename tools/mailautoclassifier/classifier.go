@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/jbrukh/bayesian"
 	"github.com/mgutz/ansi"
+	"github.com/parkghost/bayesian"
 	"github.com/parkghost/spamdefender/analyzer"
 	"github.com/parkghost/spamdefender/common"
 	"github.com/parkghost/spamdefender/html"

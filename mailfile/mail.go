@@ -54,3 +54,19 @@ func parseBoby(message *mail.Message) (text string, err error) {
 	text = bodyContent.String()
 	return
 }
+
+type MailFileFactory interface {
+	Create(string) Mail
+}
+
+type POP3MailFileFactory struct{}
+
+func (p *POP3MailFileFactory) Create(filePath string) Mail {
+	return NewPOP3Mail(filePath)
+}
+
+type PostfixMailFileFactory struct{}
+
+func (p *PostfixMailFileFactory) Create(filePath string) Mail {
+	return NewPostfixMail(filePath)
+}

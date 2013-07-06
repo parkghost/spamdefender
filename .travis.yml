@@ -2,7 +2,7 @@ language: go
 go:
   - 1.1.1
 install:
-  - go get github.com/jbrukh/bayesian
+  - go get github.com/parkghost/bayesian
   - go get github.com/djimenez/iconv-go
   - go get github.com/d3xter/GoPOP3
   - go get code.google.com/p/go.net/html

@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jbrukh/bayesian"
+	"github.com/parkghost/bayesian"
 	"github.com/parkghost/spamdefender/analyzer/goseg"
 	"github.com/parkghost/spamdefender/common"
 	"io/ioutil"
