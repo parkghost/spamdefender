@@ -8,11 +8,11 @@ type Dispatcher struct {
 	active    map[string]bool
 	rwm       *sync.RWMutex
 	handler   Handler
-	semaphore chan int
+	semaphore chan bool
 }
 
 func (d *Dispatcher) Handle(filePath string) {
-	d.semaphore <- 1
+	d.semaphore <- true
 	d.rwm.RLock()
 	_, found := d.active[filePath]
 	d.rwm.RUnlock()
@@ -33,5 +33,5 @@ func (d *Dispatcher) Handle(filePath string) {
 }
 
 func NewDispatcher(handler Handler, size int) *Dispatcher {
-	return &Dispatcher{make(map[string]bool), &sync.RWMutex{}, handler, make(chan int, size)}
+	return &Dispatcher{make(map[string]bool), &sync.RWMutex{}, handler, make(chan bool, size)}
 }
