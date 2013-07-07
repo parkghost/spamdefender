@@ -31,6 +31,7 @@ var testData = []struct {
 }
 
 func main() {
+
 	anlz, err := analyzer.NewAnalyzer(traningDataFilePath, dictFilePath)
 	if err != nil {
 		log.Fatal(err)

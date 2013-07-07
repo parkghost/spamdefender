@@ -22,6 +22,9 @@ var (
 	quarantineFolder = baseFolder + "quarantine"
 	incomingFolder   = baseFolder + "incoming"
 
+	numOfProcessor     = 100
+	folderScanInterval = time.Duration(1) * time.Second
+
 	traningDataFilePath = "data" + ps + "bayesian.data"
 	dictFilePath        = "data" + ps + "dict.txt"
 
@@ -31,16 +34,16 @@ var (
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	contentInspection := mh.NewContentInspection(allPass, quarantineFolder, traningDataFilePath, dictFilePath)
 	sendOutOnly := mh.NewSendOutOnly(localDomain, incomingFolder)
 	matchedSubject := mh.NewMatchedSubject(subjectPrefix, incomingFolder)
+	contentInspection := mh.NewContentInspection(allPass, quarantineFolder, traningDataFilePath, dictFilePath)
 	defaultDestination := mh.NewDefaultDestination(incomingFolder)
 
 	handlerChain := mh.NewHandlerChain(sendOutOnly, matchedSubject, contentInspection, defaultDestination)
-	handler := mh.NewFileHandlerAdapter(handlerChain, &mailfile.POP3MailFileFactory{})
-	dispatcher := service.NewDispatcher(handler, 100)
+	handlerAdapter := mh.NewFileHandlerAdapter(handlerChain, &mailfile.POP3MailFileFactory{})
+	dispatcher := service.NewDispatcher(handlerAdapter, numOfProcessor)
 
-	monitor := service.NewFolderMonitor(holdFolder, time.Duration(1)*time.Second, dispatcher)
+	monitor := service.NewFolderMonitor(holdFolder, folderScanInterval, dispatcher)
 	monitor.Start()
 
 	<-quit
