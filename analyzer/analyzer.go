@@ -19,12 +19,33 @@ type Analyzer struct {
 	tokenizer  *goseg.Tokenizer
 }
 
-func (a *Analyzer) Test(text string) ([]float64, bool) {
-	score, likely, _ := a.classifier.LogScores(common.Normalize(a.tokenizer.Cut([]rune(text)), cutset))
-	if a.classifier.Classes[likely] == Bad {
-		return score, false
+func (a *Analyzer) Test(text string) (bayesian.Class, map[bayesian.Class]float64) {
+	words := common.Normalize(a.tokenizer.Cut([]rune(text)), cutset)
+	score, likely, _ := a.classifier.LogScores(words)
+
+	mapping := make(map[bayesian.Class]float64)
+	for i, class := range a.classifier.Classes {
+		mapping[class] = score[i]
 	}
-	return score, true
+
+	return a.classifier.Classes[likely], mapping
+}
+
+func (a *Analyzer) Explain(text string) WordFreqList {
+	words := common.Normalize(a.tokenizer.Cut([]rune(text)), cutset)
+
+	freqMatrix := a.classifier.WordFrequencies(words)
+	wordFreqs := make([]WordFreq, len(words))
+
+	for i, _ := range words {
+		wordFreq := make([]float64, len(a.classifier.Classes))
+		for j, _ := range a.classifier.Classes {
+			wordFreq[j] = freqMatrix[j][i]
+		}
+		wordFreqs[i] = WordFreq{words[i], wordFreq}
+	}
+
+	return wordFreqs
 }
 
 type WordFreq struct {
@@ -70,24 +91,6 @@ func (wfl WordFreqList) String() string {
 	}
 	buf.WriteString("]")
 	return buf.String()
-}
-
-func (a *Analyzer) Explain(text string) WordFreqList {
-	words := a.tokenizer.Cut([]rune(text))
-	normalizedWords := common.Normalize(words, cutset)
-
-	freqMatrix := a.classifier.WordFrequencies(normalizedWords)
-	wordFreqs := make([]WordFreq, len(normalizedWords))
-
-	for i, _ := range normalizedWords {
-		wordFreq := make([]float64, len(a.classifier.Classes))
-		for j, _ := range a.classifier.Classes {
-			wordFreq[j] = freqMatrix[j][i]
-		}
-		wordFreqs[i] = WordFreq{normalizedWords[i], wordFreq}
-	}
-
-	return wordFreqs
 }
 
 func NewAnalyzer(traningDataFilePath string, dictFilePath ...string) (*Analyzer, error) {

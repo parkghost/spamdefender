@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"github.com/mgutz/ansi"
-	"github.com/parkghost/bayesian"
 	"github.com/parkghost/spamdefender/analyzer"
 	"github.com/parkghost/spamdefender/common"
 	"github.com/parkghost/spamdefender/html"
@@ -17,14 +16,8 @@ import (
 const ps = string(os.PathSeparator)
 
 var (
-	Good    bayesian.Class = "Good"
-	Bad     bayesian.Class = "Bad"
-	Neutral bayesian.Class = "Neutral"
-
 	cutset = ":;=<>"
-)
 
-var (
 	confident           = 0.01
 	dryRun              = false
 	mailbox             = ".." + ps + "mailfetecher" + ps + "mailbox"
@@ -62,23 +55,24 @@ func main() {
 			fmt.Println(err)
 		}
 
-		score, pass := anlz.Test(content)
+		class, score := anlz.Test(content)
 
 		color := ""
-		if math.Abs(score[0]/score[1]-1) < confident {
+		if math.Abs(score[analyzer.Good]/score[analyzer.Bad]-1) < confident {
 			color = "cyan+b"
 			neutrals += 1
 			if !dryRun {
 				common.CopyFile(filePath, "neutral"+ps+fi.Name())
 			}
 		} else {
-			if pass {
+			switch class {
+			case analyzer.Good:
 				color = "green+b"
 				goods += 1
 				if !dryRun {
 					common.CopyFile(filePath, "good"+ps+fi.Name())
 				}
-			} else {
+			case analyzer.Bad:
 				color = "red+b"
 				bads += 1
 				if !dryRun {

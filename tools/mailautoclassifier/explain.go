@@ -25,11 +25,11 @@ var (
 
 var testData = []struct {
 	folder string
-	test   string
+	class  string
 }{
-	{"good", "good"},
-	{"bad", "bad"},
-	{"neutral", "neutral"},
+	{"good", string(analyzer.Good)},
+	{"bad", string(analyzer.Bad)},
+	{"neutral", "Neutral"},
 }
 
 func main() {
@@ -70,8 +70,8 @@ func main() {
 				//ignore mail like Java Developer Day
 			}
 
-			score, pass := anlz.Test(content)
-			testConfident := math.Abs(score[0]/score[1] - 1)
+			class, score := anlz.Test(content)
+			testConfident := math.Abs(score[analyzer.Good]/score[analyzer.Bad] - 1)
 
 			if testConfident < confident {
 				msg := fmt.Sprintf("%s, %s, %f\n", mail.Subject(), mailFilePath, testConfident)
@@ -81,9 +81,7 @@ func main() {
 				}
 			} else {
 				totalConfident += 1
-				if (item.test == "good" && !pass) ||
-					(item.test == "bad" && pass) ||
-					(item.test == "neutral") {
+				if (item.class != string(class)) || item.class == "Neutral" {
 					totalError += 1
 					msg := fmt.Sprintf("%s, %s, %f\n", mail.Subject(), mailFilePath, testConfident)
 					fmt.Printf(ansi.Color(msg, "red+b"))

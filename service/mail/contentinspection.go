@@ -22,8 +22,8 @@ func (cih *ContentInspectionHandler) Handle(mail mailfile.Mail) bool {
 		return true
 	}
 
-	_, pass := cih.anlz.Test(content)
-	if cih.allPass || pass {
+	class, _ := cih.anlz.Test(content)
+	if cih.allPass || analyzer.Good == class {
 		return true
 	}
 
