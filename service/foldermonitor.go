@@ -10,10 +10,10 @@ import (
 const ps = string(os.PathSeparator)
 
 type FolderMonitor struct {
-	folder   string
-	duration time.Duration
-	handler  Handler
-	ticker   *time.Ticker
+	folder     string
+	duration   time.Duration
+	dispatcher Dispatcher
+	ticker     *time.Ticker
 }
 
 func (m *FolderMonitor) Start() {
@@ -38,7 +38,11 @@ loop:
 
 			for _, fi := range fis {
 				log.Println("Found Mail:", m.folder+ps+fi.Name())
-				m.handler.Handle(m.folder + ps + fi.Name())
+				m.dispatcher.Dispatch(m.folder + ps + fi.Name())
+			}
+
+			if waiter, ok := m.dispatcher.(Waiter); ok {
+				waiter.Wait()
 			}
 		}
 	}
@@ -48,6 +52,6 @@ func (m *FolderMonitor) Stop() {
 	m.ticker.Stop()
 }
 
-func NewFolderMonitor(folder string, duration time.Duration, handler Handler) *FolderMonitor {
-	return &FolderMonitor{folder: folder, duration: duration, handler: handler}
+func NewFolderMonitor(folder string, duration time.Duration, dispatcher Dispatcher) *FolderMonitor {
+	return &FolderMonitor{folder: folder, duration: duration, dispatcher: dispatcher}
 }

@@ -22,7 +22,7 @@ var (
 	quarantineFolder = baseFolder + "quarantine"
 	incomingFolder   = baseFolder + "incoming"
 
-	numOfProcessor     = 1
+	numOfProcessor     = 100
 	cacheSize          = 100
 	folderScanInterval = time.Duration(1) * time.Second
 
@@ -42,7 +42,7 @@ func main() {
 	cache := mh.NewCache(sendOutOnly, cacheSize)
 
 	handlerAdapter := mh.NewFileHandlerAdapter(cache, &mailfile.POP3MailFileFactory{})
-	dispatcher := service.NewDispatcher(handlerAdapter, numOfProcessor)
+	dispatcher := service.NewPooledDispatcher(handlerAdapter, numOfProcessor)
 
 	monitor := service.NewFolderMonitor(holdFolder, folderScanInterval, dispatcher)
 	monitor.Start()

@@ -9,8 +9,6 @@ import (
 	"path"
 )
 
-// TODO: check duplicate files
-
 const ps = string(os.PathSeparator)
 
 type Result string

@@ -4,34 +4,35 @@ import (
 	"sync"
 )
 
-type Dispatcher struct {
-	active    map[string]bool
-	rwm       *sync.RWMutex
+type Dispatcher interface {
+	Dispatch(string)
+}
+
+type Waiter interface {
+	Wait()
+}
+
+type PooledDispatcher struct {
 	handler   Handler
+	wg        *sync.WaitGroup
 	semaphore chan bool
 }
 
-func (d *Dispatcher) Handle(filePath string) {
+func (d *PooledDispatcher) Dispatch(filePath string) {
+	d.wg.Add(1)
 	d.semaphore <- true
-	d.rwm.RLock()
-	_, found := d.active[filePath]
-	d.rwm.RUnlock()
-	if !found {
-		go func() {
-			d.rwm.Lock()
-			d.active[filePath] = true
-			d.rwm.Unlock()
+	go func() {
+		d.handler.Handle(filePath)
 
-			d.handler.Handle(filePath)
-
-			d.rwm.Lock()
-			delete(d.active, filePath)
-			d.rwm.Unlock()
-			<-d.semaphore
-		}()
-	}
+		d.wg.Done()
+		<-d.semaphore
+	}()
 }
 
-func NewDispatcher(handler Handler, size int) *Dispatcher {
-	return &Dispatcher{make(map[string]bool), &sync.RWMutex{}, handler, make(chan bool, size)}
+func (d *PooledDispatcher) Wait() {
+	d.wg.Wait()
+}
+
+func NewPooledDispatcher(handler Handler, size int) Dispatcher {
+	return &PooledDispatcher{handler, &sync.WaitGroup{}, make(chan bool, size)}
 }
