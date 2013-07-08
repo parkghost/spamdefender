@@ -11,7 +11,7 @@ import (
 type ContentInspectionHandler struct {
 	allPass          bool
 	quarantineFolder string
-	anlz             *analyzer.Analyzer
+	anlz             analyzer.Analyzer
 }
 
 func (cih *ContentInspectionHandler) Handle(mail mailfile.Mail) bool {
@@ -22,7 +22,7 @@ func (cih *ContentInspectionHandler) Handle(mail mailfile.Mail) bool {
 		return true
 	}
 
-	class, _ := cih.anlz.Test(content)
+	class := cih.anlz.Test(content)
 	if cih.allPass || analyzer.Good == class {
 		return true
 	}
@@ -40,7 +40,7 @@ func (cih *ContentInspectionHandler) String() string {
 }
 
 func NewContentInspection(allPass bool, quarantineFolder string, traningDataFilePath string, dictFilePath string) Handler {
-	anlz, err := analyzer.NewAnalyzer(traningDataFilePath, dictFilePath)
+	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}

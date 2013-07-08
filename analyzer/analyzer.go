@@ -6,32 +6,40 @@ import (
 	"github.com/parkghost/bayesian"
 	"github.com/parkghost/spamdefender/analyzer/goseg"
 	"github.com/parkghost/spamdefender/common"
+	"math"
 )
 
 const (
-	Good   bayesian.Class = "Good"
-	Bad    bayesian.Class = "Bad"
-	cutset                = ":;=<>"
+	Good           = "Good"
+	Bad            = "Bad"
+	Neutral        = "Neutral"
+	ClassIdxOfGood = 0
+	ClassIdxOfBad  = 1
+	cutset         = ":;=<>"
+	Threshold      = 0.01
 )
 
-type Analyzer struct {
+type Analyzer interface {
+	Test(text string) string
+}
+
+type BayesianAnalyzer struct {
 	classifier *bayesian.Classifier
 	tokenizer  *goseg.Tokenizer
 }
 
-func (a *Analyzer) Test(text string) (bayesian.Class, map[bayesian.Class]float64) {
+func (a *BayesianAnalyzer) Test(text string) string {
 	words := common.Normalize(a.tokenizer.Cut([]rune(text)), cutset)
 	score, likely, _ := a.classifier.LogScores(words)
 
-	mapping := make(map[bayesian.Class]float64)
-	for i, class := range a.classifier.Classes {
-		mapping[class] = score[i]
+	if math.Abs(score[ClassIdxOfGood]/score[ClassIdxOfBad]-1) < Threshold {
+		return Neutral
 	}
 
-	return a.classifier.Classes[likely], mapping
+	return string(a.classifier.Classes[likely])
 }
 
-func (a *Analyzer) Explain(text string) WordFreqList {
+func (a *BayesianAnalyzer) Explain(text string) WordFreqList {
 	words := common.Normalize(a.tokenizer.Cut([]rune(text)), cutset)
 
 	freqMatrix := a.classifier.WordFrequencies(words)
@@ -93,7 +101,7 @@ func (wfl WordFreqList) String() string {
 	return buf.String()
 }
 
-func NewAnalyzer(traningDataFilePath string, dictFilePath ...string) (*Analyzer, error) {
+func NewBayesianAnalyzer(traningDataFilePath string, dictFilePath ...string) (Analyzer, error) {
 	classifier, err := bayesian.NewClassifierFromFile(traningDataFilePath)
 	if err != nil {
 		return nil, err
@@ -103,5 +111,5 @@ func NewAnalyzer(traningDataFilePath string, dictFilePath ...string) (*Analyzer,
 	if err != nil {
 		return nil, err
 	}
-	return &Analyzer{classifier, tokenizer}, nil
+	return &BayesianAnalyzer{classifier, tokenizer}, nil
 }

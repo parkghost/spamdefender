@@ -9,7 +9,6 @@ import (
 	"github.com/parkghost/spamdefender/mailfile"
 	"io/ioutil"
 	"log"
-	"math"
 	"os"
 	"time"
 )
@@ -17,7 +16,6 @@ import (
 const ps = string(os.PathSeparator)
 
 var (
-	confident           = 0.01
 	explain             = true
 	dictFilePath        = ".." + ps + ".." + ps + "data" + ps + "dict.txt"
 	traningDataFilePath = "bayesian.data"
@@ -33,7 +31,7 @@ var testData = []struct {
 }
 
 func main() {
-	anlz, err := analyzer.NewAnalyzer(traningDataFilePath, dictFilePath)
+	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -41,7 +39,7 @@ func main() {
 	for _, item := range testData {
 		log.Printf("Testing %s", item.folder)
 
-		totalNum, totalError, totalConfident := 0, 0, 0
+		totalNum, totalError, totalNeutral := 0, 0, 0
 		var totalSize int64
 
 		fis, err := ioutil.ReadDir(item.folder)
@@ -70,23 +68,30 @@ func main() {
 				//ignore mail like Java Developer Day
 			}
 
-			class, score := anlz.Test(content)
-			testConfident := math.Abs(score[analyzer.Good]/score[analyzer.Bad] - 1)
+			class := anlz.Test(content)
 
-			if testConfident < confident {
-				msg := fmt.Sprintf("%s, %s, %f\n", mail.Subject(), mailFilePath, testConfident)
-				fmt.Printf(ansi.Color(msg, "cyan+b"))
-				if explain {
-					fmt.Println(anlz.Explain(content))
+			color := ""
+			showInfo := false
+
+			if item.class != class {
+				totalError += 1
+				showInfo = true
+				color = "red+b"
+				if class == analyzer.Neutral {
+					totalNeutral += 1
 				}
-			} else {
-				totalConfident += 1
-				if (item.class != string(class)) || item.class == "Neutral" {
-					totalError += 1
-					msg := fmt.Sprintf("%s, %s, %f\n", mail.Subject(), mailFilePath, testConfident)
-					fmt.Printf(ansi.Color(msg, "red+b"))
-					if explain {
-						fmt.Println(anlz.Explain(content))
+			} else if item.class == analyzer.Neutral {
+				totalNeutral += 1
+				showInfo = true
+				color = "cyan+b"
+			}
+
+			if showInfo {
+				msg := fmt.Sprintf("%s, %s\n", mail.Subject(), mailFilePath)
+				fmt.Printf(ansi.Color(msg, color))
+				if explain {
+					if ba, ok := anlz.(*analyzer.BayesianAnalyzer); ok {
+						fmt.Println(ba.Explain(content))
 					}
 				}
 			}
@@ -97,7 +102,7 @@ func main() {
 			time.Now().Sub(startTime),
 			float64(totalNum)/(float64(elapsed)/float64(time.Second)),
 			common.HumanReadableSize(uint64(float64(totalSize)/(float64(elapsed)/float64(time.Second)))))
-		fmt.Printf("TotalNum: %d, TotalError: %d, ErrRate: %f, TotalConfident:%d, ConfidentRate:%f\n",
-			totalNum, totalError, float64(totalError)/float64(totalNum), totalConfident, float64(totalConfident)/float64(totalNum))
+		fmt.Printf("TotalNum: %d, TotalError: %d, ErrRate: %f, TotalNeutral:%d, Confident:%f\n",
+			totalNum, totalError, float64(totalError)/float64(totalNum), totalNeutral, float64(totalNum-totalNeutral)/float64(totalNum))
 	}
 }

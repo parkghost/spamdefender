@@ -9,7 +9,6 @@ import (
 	"github.com/parkghost/spamdefender/mailfile"
 	"io/ioutil"
 	"log"
-	"math"
 	"os"
 	"time"
 )
@@ -31,8 +30,7 @@ var testData = []struct {
 }
 
 func main() {
-
-	anlz, err := analyzer.NewAnalyzer(traningDataFilePath, dictFilePath)
+	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -40,7 +38,7 @@ func main() {
 	for _, item := range testData {
 		log.Printf("Testing %s", item.folder)
 
-		totalNum, totalError, totalConfident := 0, 0, 0
+		totalNum, totalError, totalNeutral := 0, 0, 0
 		var totalSize int64
 
 		fis, err := ioutil.ReadDir(item.folder)
@@ -69,20 +67,18 @@ func main() {
 				//ignore mail like Java Developer Day
 			}
 
-			class, score := anlz.Test(content)
+			class := anlz.Test(content)
 
-			if math.Abs(score[analyzer.Good]/score[analyzer.Bad]-1) > confident {
-				totalConfident += 1
-			} else {
-				msg := fmt.Sprintf("%s, %f\n", mailFilePath, score[analyzer.Good]/score[analyzer.Bad])
-				fmt.Printf(ansi.Color(msg, "cyan+b"))
-			}
+			switch {
+			case analyzer.Neutral == class:
+				totalNeutral += 1
+				fmt.Println(ansi.Color(mailFilePath, "cyan+b"))
 
-			if item.class != string(class) {
+			case item.class != class:
 				totalError += 1
-				msg := fmt.Sprintf("%s, %f\n", mailFilePath, score[analyzer.Good]/score[analyzer.Bad])
-				fmt.Printf(ansi.Color(msg, "red+b"))
+				fmt.Println(ansi.Color(mailFilePath, "red+b"))
 			}
+
 		}
 
 		elapsed := time.Now().Sub(startTime)
@@ -90,7 +86,7 @@ func main() {
 			time.Now().Sub(startTime),
 			float64(totalNum)/(float64(elapsed)/float64(time.Second)),
 			common.HumanReadableSize(uint64(float64(totalSize)/(float64(elapsed)/float64(time.Second)))))
-		fmt.Printf("TotalNum: %d, TotalError: %d, ErrRate: %f, TotalConfident:%d, ConfidentRate:%f\n",
-			totalNum, totalError, float64(totalError)/float64(totalNum), totalConfident, float64(totalConfident)/float64(totalNum))
+		fmt.Printf("TotalNum: %d, TotalError: %d, ErrRate: %f, TotalNeutral:%d, Confident:%f\n",
+			totalNum, totalError, float64(totalError)/float64(totalNum), totalNeutral, float64(totalNum-totalNeutral)/float64(totalNum))
 	}
 }
