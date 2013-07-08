@@ -13,6 +13,7 @@ import (
 
 type trie_node struct {
 	lookup map[rune]*trie_node
+	last   bool
 }
 
 type tuple struct {
@@ -35,7 +36,7 @@ func add_string(trie *trie_node, s string) {
 		}
 		ptr = ptr.lookup[c]
 	}
-	ptr.lookup[0] = new_trie_node()
+	ptr.last = true
 }
 
 type Tokenizer struct {
@@ -96,7 +97,7 @@ func (tk *Tokenizer) cut_DAG(sentence []rune) []string {
 		c := sentence[j]
 		if p.lookup[c] != nil {
 			p = p.lookup[c]
-			if p.lookup[0] != nil {
+			if p.last {
 				if DAG[i] == nil {
 					DAG[i] = make([]int, 0)
 				}

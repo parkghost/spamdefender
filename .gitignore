@@ -3,6 +3,8 @@ bad
 neutral
 mailbox
 fakeQueues
+*.pprof
+profilingtool.go
 bayesian.data
 badtermfreq.txt
 goodtermfreq.txt
