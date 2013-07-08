@@ -4,4 +4,6 @@ neutral
 mailbox
 fakeQueues
 bayesian.data
+badtermfreq.txt
+goodtermfreq.txt
 spamdefender

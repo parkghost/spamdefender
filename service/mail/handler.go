@@ -1,6 +1,7 @@
 package mail
 
 import (
+	"github.com/parkghost/spamdefender/common"
 	"github.com/parkghost/spamdefender/mailfile"
 	"github.com/parkghost/spamdefender/service"
 	"log"
@@ -8,31 +9,14 @@ import (
 	"path"
 )
 
-// TODO: check duplicate mail
+// TODO: check duplicate files
 
 const ps = string(os.PathSeparator)
 
+type Result string
+
 type Handler interface {
-	Handle(mailfile.Mail) bool
-}
-
-type HandlerChain struct {
-	handlers []Handler
-}
-
-func (hc HandlerChain) Handle(mail mailfile.Mail) bool {
-	for _, handler := range hc.handlers {
-		log.Printf("Run %s for Mail: %s\n", handler, mail.Name())
-		next := handler.Handle(mail)
-		if !next {
-			break
-		}
-	}
-	return true
-}
-
-func NewHandlerChain(list ...Handler) Handler {
-	return &HandlerChain{list}
+	Handle(mailfile.Mail) Result
 }
 
 type FileHandlerAdapter struct {
@@ -45,13 +29,19 @@ func (fha *FileHandlerAdapter) Handle(filePath string) {
 	if err == nil {
 		mail := fha.factory.Create(filePath)
 
-		if err := mail.Parse(); err != nil {
+		if err = mail.Parse(); err != nil {
 			_, mailName := path.Split(filePath)
-			log.Printf("FileHandlerAdapter: Err: %v, Mail:%s\n", err, mailName)
+			log.Printf("FileHandlerAdapter: Err:%v, Mail:%s\n", err, mailName)
 			return
 		}
 
-		fha.handler.Handle(mail)
+		result := fha.handler.Handle(mail)
+		log.Printf("Move to %s, Mail:%s\n", result, mail.Name())
+		err = common.MoveFile(mail.Path(), string(result))
+		if err != nil {
+			log.Printf("FileHandlerAdapter: Err:%v, Mail:%s\n", err, mail.Name())
+		}
+
 	}
 }
 
