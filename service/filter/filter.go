@@ -1,4 +1,4 @@
-package mail
+package filter
 
 import (
 	"github.com/parkghost/spamdefender/common"
@@ -13,12 +13,12 @@ const ps = string(os.PathSeparator)
 
 type Result string
 
-type Handler interface {
-	Handle(mailfile.Mail) Result
+type Filter interface {
+	Filter(mailfile.Mail) Result
 }
 
 type FileHandlerAdapter struct {
-	handler Handler
+	filter  Filter
 	factory mailfile.MailFileFactory
 }
 
@@ -33,7 +33,7 @@ func (fha *FileHandlerAdapter) Handle(filePath string) {
 			return
 		}
 
-		result := fha.handler.Handle(mail)
+		result := fha.filter.Filter(mail)
 		log.Printf("Move to %s, Mail:%s\n", result, mail.Name())
 		err = common.MoveFile(mail.Path(), string(result))
 		if err != nil {
@@ -43,6 +43,6 @@ func (fha *FileHandlerAdapter) Handle(filePath string) {
 	}
 }
 
-func NewFileHandlerAdapter(handler Handler, factory mailfile.MailFileFactory) service.Handler {
-	return &FileHandlerAdapter{handler, factory}
+func NewFileHandlerAdapter(filter Filter, factory mailfile.MailFileFactory) service.Handler {
+	return &FileHandlerAdapter{filter, factory}
 }

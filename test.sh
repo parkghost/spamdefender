@@ -32,8 +32,8 @@ go build fetcher.go
 go clean
 popd >/dev/null
 
-echo "build mailautoclassifier"
-pushd mailautoclassifier >/dev/null
+echo "build mailclassifier"
+pushd mailclassifier >/dev/null
 go build classifier.go
 go build explain.go
 go build termfreq.go

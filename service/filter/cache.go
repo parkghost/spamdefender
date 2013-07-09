@@ -1,4 +1,4 @@
-package mail
+package filter
 
 import (
 	"container/list"
@@ -7,8 +7,8 @@ import (
 	"sync"
 )
 
-type CacheHandler struct {
-	next Handler
+type CacheFilter struct {
+	next Filter
 	rwm  *sync.RWMutex
 	l    *list.List
 	size int
@@ -19,7 +19,7 @@ type Tuple struct {
 	result  Result
 }
 
-func (ch *CacheHandler) Handle(mail mailfile.Mail) Result {
+func (ch *CacheFilter) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", ch, mail.Name())
 
 	subject := mail.Subject()
@@ -35,7 +35,7 @@ func (ch *CacheHandler) Handle(mail mailfile.Mail) Result {
 	}
 	ch.rwm.RUnlock()
 
-	result := ch.next.Handle(mail)
+	result := ch.next.Filter(mail)
 
 	ch.rwm.Lock()
 	ch.l.PushFront(&Tuple{subject, result})
@@ -47,10 +47,10 @@ func (ch *CacheHandler) Handle(mail mailfile.Mail) Result {
 	return result
 }
 
-func (ch *CacheHandler) String() string {
-	return "CacheHandler"
+func (ch *CacheFilter) String() string {
+	return "CacheFilter"
 }
 
-func NewCache(next Handler, size int) Handler {
-	return &CacheHandler{next, &sync.RWMutex{}, list.New(), size}
+func NewCache(next Filter, size int) Filter {
+	return &CacheFilter{next, &sync.RWMutex{}, list.New(), size}
 }

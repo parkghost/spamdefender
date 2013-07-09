@@ -1,4 +1,4 @@
-package mail
+package filter
 
 import (
 	"github.com/parkghost/spamdefender/mailfile"
@@ -6,13 +6,13 @@ import (
 	"strings"
 )
 
-type SendOutOnlyHandler struct {
-	next        Handler
+type SendOutOnlyFilter struct {
+	next        Filter
 	localDomain string
 	destFolder  string
 }
 
-func (soh *SendOutOnlyHandler) Handle(mail mailfile.Mail) Result {
+func (soh *SendOutOnlyFilter) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", soh, mail.Name())
 
 	sendOut := false
@@ -27,13 +27,13 @@ func (soh *SendOutOnlyHandler) Handle(mail mailfile.Mail) Result {
 		return Result(soh.destFolder + ps + mail.Name())
 	}
 
-	return soh.next.Handle(mail)
+	return soh.next.Filter(mail)
 }
 
-func (soh *SendOutOnlyHandler) String() string {
-	return "SendOutOnlyHandler"
+func (soh *SendOutOnlyFilter) String() string {
+	return "SendOutOnlyFilter"
 }
 
-func NewSendOutOnly(next Handler, localDomain string, destFolder string) Handler {
-	return &SendOutOnlyHandler{next, localDomain, destFolder}
+func NewSendOutOnly(next Filter, localDomain string, destFolder string) Filter {
+	return &SendOutOnlyFilter{next, localDomain, destFolder}
 }
