@@ -22,8 +22,8 @@ var (
 )
 
 var (
-	dictFilePath = ".." + ps + "data" + ps + "dict.txt"
-	output       = ".." + ps + "data" + ps + "bayesian.data"
+	dictDataFilePath = ".." + ps + "data" + ps + "dict.data"
+	output           = ".." + ps + "data" + ps + "bayesian.data"
 )
 
 var trainingData = []struct {
@@ -36,7 +36,7 @@ var trainingData = []struct {
 
 func main() {
 	classifier := bayesian.NewClassifier(Good, Bad)
-	tokenizer, err := goseg.NewTokenizer(dictFilePath)
+	tokenizer, err := goseg.NewTokenizerFromFile(dictDataFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}

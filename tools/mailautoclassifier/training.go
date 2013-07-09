@@ -19,14 +19,14 @@ var (
 )
 
 var (
-	dictFilePath = ".." + ps + ".." + ps + "data" + ps + "dict.txt"
-	output       = "bayesian.data"
+	dictDataFilePath = ".." + ps + ".." + ps + "data" + ps + "dict.data"
+	output           = "bayesian.data"
 )
 
 func main() {
 	classifier := bayesian.NewClassifier(Good, Bad)
 
-	tokenizer, err := goseg.NewTokenizer(dictFilePath)
+	tokenizer, err := goseg.NewTokenizerFromFile(dictDataFilePath)
 	checkErr(err)
 
 	goodWords, err := getWords("goodwords.txt", tokenizer)

@@ -2,45 +2,115 @@ package goseg
 
 /*
 forked from https://github.com/fxsjy/goseg
-removed artificial neural network for speedup
+removed artificial neural network
+use struct instead of map
+persistence of Tokenizer
 */
+
 import (
+	"bytes"
+	"encoding/gob"
+	"io"
 	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 )
 
-type trie_node struct {
-	lookup map[rune]*trie_node
-	last   bool
-}
-
 type tuple struct {
 	freq float32
 	pos  int
 }
 
-func new_trie_node() *trie_node {
-	new_node := &trie_node{}
-	new_node.lookup = make(map[rune]*trie_node)
-	return new_node
+type TrieNode struct {
+	Children []*TrieNode
+	Char     rune
+	Last     bool
 }
 
-func add_string(trie *trie_node, s string) {
-	var ptr *trie_node
-	ptr = trie
-	for _, c := range s {
-		if ptr.lookup[c] == nil {
-			ptr.lookup[c] = new_trie_node()
+func (tn *TrieNode) String() string {
+	buf := bytes.NewBufferString("[")
+	for i, node := range tn.Children {
+		if i == 0 {
+			buf.WriteRune(node.Char)
+			buf.WriteString(":" + node.String())
+		} else {
+			buf.WriteString(", ")
+			buf.WriteRune(node.Char)
+			buf.WriteString(":" + node.String())
 		}
-		ptr = ptr.lookup[c]
+
 	}
-	ptr.last = true
+	buf.WriteString("]")
+	return buf.String()
+}
+
+func (tn *TrieNode) Lookup(Char rune) *TrieNode {
+	n := len(tn.Children)
+	if n == 0 {
+		return nil
+	}
+
+	l, r := 0, n-1
+	for {
+		m := (l + r) / 2
+		c := tn.Children[m].Char
+		if c == Char {
+			return tn.Children[m]
+		} else if c > Char {
+			r = m - 1
+		} else {
+			l = m + 1
+		}
+
+		if l > r {
+			return nil
+		}
+	}
+}
+
+func (tn *TrieNode) AddString(word string) *TrieNode {
+	ptr := tn
+	for _, c := range []rune(word) {
+		if node := ptr.Lookup(c); node != nil {
+			ptr = node
+		} else {
+			ptr = ptr.addChild(c)
+		}
+	}
+	ptr.Last = true
+	return ptr
+}
+
+func (tn *TrieNode) addChild(Char rune) *TrieNode {
+	node := &TrieNode{Children: make([]*TrieNode, 0), Char: Char}
+
+	n := len(tn.Children)
+	if n == 0 {
+		tn.Children = append(tn.Children, node)
+	} else {
+		// sorting
+		for i := 0; i < n; i++ {
+			child := tn.Children[i]
+			if Char < child.Char {
+				newChildren := make([]*TrieNode, 0, len(tn.Children)+1)
+				newChildren = append(newChildren, tn.Children[:i]...)
+				newChildren = append(newChildren, node)
+				newChildren = append(newChildren, tn.Children[i:]...)
+				tn.Children = newChildren
+				break
+			}
+
+			if i == n-1 {
+				tn.Children = append(tn.Children, node)
+			}
+		}
+	}
+	return node
 }
 
 type Tokenizer struct {
-	trie       *trie_node
+	trie       *TrieNode
 	freq_table map[string]float32
 	min_freq   float32
 }
@@ -95,9 +165,9 @@ func (tk *Tokenizer) cut_DAG(sentence []rune) []string {
 	DAG := make(map[int][]int)
 	for i < N {
 		c := sentence[j]
-		if p.lookup[c] != nil {
-			p = p.lookup[c]
-			if p.last {
+		if p.Lookup(c) != nil {
+			p = p.Lookup(c)
+			if p.Last {
 				if DAG[i] == nil {
 					DAG[i] = make([]int, 0)
 				}
@@ -144,7 +214,6 @@ func (tk *Tokenizer) calc(sentence []rune, DAG map[int][]int, idx int, route map
 		next := DAG[idx]
 		for _, x := range next {
 			candidate := route[x+1]
-			//fmt.Println(idx,x+1,N)
 			word_freq := tk.freq_table[string(sentence[idx:x+1])]
 			if word_freq == 0 { //smooth
 				word_freq = tk.min_freq
@@ -161,7 +230,7 @@ func (tk *Tokenizer) calc(sentence []rune, DAG map[int][]int, idx int, route map
 }
 
 func NewTokenizer(dictionaries ...string) (*Tokenizer, error) {
-	trie := new_trie_node()
+	trie := &TrieNode{}
 	freq_table := make(map[string]float32)
 	var min_freq float32 = 0.0
 
@@ -188,7 +257,7 @@ func NewTokenizer(dictionaries ...string) (*Tokenizer, error) {
 			tup := strings.Split(line, " ")
 			word = tup[0]
 			freq, _ = strconv.Atoi(tup[1])
-			add_string(trie, word)
+			trie.AddString(word)
 			freq_table[word] = float32(freq)
 		}
 	}
@@ -213,4 +282,44 @@ func normalize(d map[string]float32) (float32, map[string]float32) {
 		}
 	}
 	return _min, new_d
+}
+
+type serializableTokenizer struct {
+	Trie      *TrieNode
+	FreqTable map[string]float32
+	MinFreq   float32
+}
+
+func NewTokenizerFromFile(name string) (c *Tokenizer, err error) {
+	file, err := os.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+	return NewTokenizerFromReader(file)
+}
+
+func NewTokenizerFromReader(r io.Reader) (c *Tokenizer, err error) {
+	dec := gob.NewDecoder(r)
+	w := new(serializableTokenizer)
+	err = dec.Decode(w)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Tokenizer{w.Trie, w.FreqTable, w.MinFreq}, nil
+}
+
+func (tk *Tokenizer) WriteToFile(name string) (err error) {
+	file, err := os.OpenFile(name, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	return tk.WriteTo(file)
+}
+
+func (tk *Tokenizer) WriteTo(w io.Writer) (err error) {
+	enc := gob.NewEncoder(w)
+	err = enc.Encode(&serializableTokenizer{tk.trie, tk.freq_table, tk.min_freq})
+	return
 }

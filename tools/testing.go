@@ -17,7 +17,7 @@ const ps = string(os.PathSeparator)
 
 var (
 	confident           = 0.01
-	dictFilePath        = ".." + ps + "data" + ps + "dict.txt"
+	dictDataFilePath    = ".." + ps + "data" + ps + "dict.data"
 	traningDataFilePath = ".." + ps + "data" + ps + "bayesian.data"
 )
 
@@ -30,7 +30,7 @@ var testData = []struct {
 }
 
 func main() {
-	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictFilePath)
+	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictDataFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}

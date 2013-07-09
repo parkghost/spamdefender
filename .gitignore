@@ -6,6 +6,7 @@ fakeQueues
 *.pprof
 profilingtool.go
 bayesian.data
+dict.data
 badtermfreq.txt
 goodtermfreq.txt
 spamdefender

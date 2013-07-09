@@ -26,13 +26,13 @@ var allData = []struct {
 var (
 	cutset = ":;=<>"
 
-	termMinLength = 1
-	topTermRatio  = 0.90
-	dictFilePath  = ".." + ps + ".." + ps + "data" + ps + "dict.txt"
+	termMinLength    = 1
+	topTermRatio     = 0.90
+	dictDataFilePath = ".." + ps + ".." + ps + "data" + ps + "dict.data"
 )
 
 func main() {
-	tokenizer, err := goseg.NewTokenizer(dictFilePath)
+	tokenizer, err := goseg.NewTokenizerFromFile(dictDataFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}

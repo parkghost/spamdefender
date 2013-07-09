@@ -27,18 +27,27 @@ var (
 	folderScanInterval = time.Duration(1) * time.Second
 
 	traningDataFilePath = "data" + ps + "bayesian.data"
-	dictFilePath        = "data" + ps + "dict.txt"
+	dictDataFilePath    = "data" + ps + "dict.data"
 
 	quit = make(chan struct{})
 )
 
 func main() {
+	go func() {
+		for {
+			time.Sleep(time.Duration(10) * time.Second)
+			DumpHeap()
+			runtime.GC()
+			DumpHeap()
+			PrintGCSummary()
+		}
+	}()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	defaultDestination := mh.NewDestination(incomingFolder)
-	contentInspection := mh.NewContentInspection(defaultDestination, allPass, quarantineFolder, traningDataFilePath, dictFilePath)
-	subjectPrefixMatch := mh.NewSubjectPrefixMatch(contentInspection, subjectPrefix, incomingFolder)
-	sendOutOnly := mh.NewSendOutOnly(subjectPrefixMatch, localDomain, incomingFolder)
+	contentInspection := mh.NewContentInspection(defaultDestination, allPass, quarantineFolder, traningDataFilePath, dictDataFilePath)
+	//subjectPrefixMatch := mh.NewSubjectPrefixMatch(contentInspection, subjectPrefix, incomingFolder)
+	sendOutOnly := mh.NewSendOutOnly(contentInspection, localDomain, incomingFolder)
 	cache := mh.NewCache(sendOutOnly, cacheSize)
 
 	handlerAdapter := mh.NewFileHandlerAdapter(cache, &mailfile.POP3MailFileFactory{})

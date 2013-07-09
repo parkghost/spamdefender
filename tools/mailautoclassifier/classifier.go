@@ -20,12 +20,12 @@ var (
 	confident           = 0.01
 	dryRun              = false
 	mailbox             = ".." + ps + "mailfetecher" + ps + "mailbox"
-	dictFilePath        = ".." + ps + ".." + ps + "data" + ps + "dict.txt"
+	dictDataFilePath    = ".." + ps + ".." + ps + "data" + ps + "dict.data"
 	traningDataFilePath = "bayesian.data"
 )
 
 func main() {
-	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictFilePath)
+	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictDataFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}

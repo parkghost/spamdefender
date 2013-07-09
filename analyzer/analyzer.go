@@ -101,13 +101,13 @@ func (wfl WordFreqList) String() string {
 	return buf.String()
 }
 
-func NewBayesianAnalyzer(traningDataFilePath string, dictFilePath ...string) (Analyzer, error) {
+func NewBayesianAnalyzer(traningDataFilePath string, dictDataFilePath string) (Analyzer, error) {
 	classifier, err := bayesian.NewClassifierFromFile(traningDataFilePath)
 	if err != nil {
 		return nil, err
 	}
 
-	tokenizer, err := goseg.NewTokenizer(dictFilePath...)
+	tokenizer, err := goseg.NewTokenizerFromFile(dictDataFilePath)
 	if err != nil {
 		return nil, err
 	}

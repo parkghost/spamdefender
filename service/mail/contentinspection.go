@@ -36,8 +36,8 @@ func (cih *ContentInspectionHandler) String() string {
 	return "ContentInspectionHandler"
 }
 
-func NewContentInspection(next Handler, allPass bool, quarantineFolder string, traningDataFilePath string, dictFilePath string) Handler {
-	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictFilePath)
+func NewContentInspection(next Handler, allPass bool, quarantineFolder string, traningDataFilePath string, dictDataFilePath string) Handler {
+	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictDataFilePath)
 	if err != nil {
 		log.Fatal(err)
 	}

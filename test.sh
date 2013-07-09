@@ -2,7 +2,7 @@
 set -e
 # a helper script to run tests in the appropriate directories
 
-for dir in html ; do
+for dir in html analyzer/goseg ; do
     echo "testing $dir"
     pushd $dir >/dev/null
     go test -test.v -timeout 15s
@@ -23,6 +23,7 @@ echo "build tools"
 pushd tools >/dev/null
 go build testing.go 
 go build training.go 
+go build builddictionarydata.go
 go clean
 
 echo "build mailfetcher"
