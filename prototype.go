@@ -33,15 +33,6 @@ var (
 )
 
 func main() {
-	go func() {
-		for {
-			time.Sleep(time.Duration(10) * time.Second)
-			DumpHeap()
-			runtime.GC()
-			DumpHeap()
-			PrintGCSummary()
-		}
-	}()
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	defaultDestination := mh.NewDestination(incomingFolder)
