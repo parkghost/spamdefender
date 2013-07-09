@@ -12,17 +12,17 @@ type SubjectPrefixMatchFilter struct {
 	destFolder    string
 }
 
-func (msh *SubjectPrefixMatchFilter) Filter(mail mailfile.Mail) Result {
-	log.Printf("Run %s, Mail:%s\n", msh, mail.Name())
+func (spmf *SubjectPrefixMatchFilter) Filter(mail mailfile.Mail) Result {
+	log.Printf("Run %s, Mail:%s\n", spmf, mail.Name())
 
-	if !strings.HasPrefix(mail.Subject(), msh.subjectPrefix) {
-		return Result(msh.destFolder + ps + mail.Name())
+	if !strings.HasPrefix(mail.Subject(), spmf.subjectPrefix) {
+		return Result(spmf.destFolder + ps + mail.Name())
 	}
 
-	return msh.next.Filter(mail)
+	return spmf.next.Filter(mail)
 }
 
-func (msh *SubjectPrefixMatchFilter) String() string {
+func (spmf *SubjectPrefixMatchFilter) String() string {
 	return "SubjectPrefixMatchFilter"
 }
 

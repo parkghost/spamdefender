@@ -37,7 +37,7 @@ func main() {
 	log.Println("Starting daemon")
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	defaultDestination := filter.NewDestination(incomingFolder)
+	defaultDestination := filter.NewDefaultDestination(incomingFolder)
 	contentInspection := filter.NewContentInspection(defaultDestination, allPass, quarantineFolder, traningDataFilePath, dictDataFilePath)
 	subjectPrefixMatch := filter.NewSubjectPrefixMatch(contentInspection, subjectPrefix, incomingFolder)
 	sendOutOnly := filter.NewSendOutOnly(subjectPrefixMatch, localDomain, incomingFolder)

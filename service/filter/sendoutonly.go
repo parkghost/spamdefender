@@ -12,25 +12,25 @@ type SendOutOnlyFilter struct {
 	destFolder  string
 }
 
-func (soh *SendOutOnlyFilter) Filter(mail mailfile.Mail) Result {
-	log.Printf("Run %s, Mail:%s\n", soh, mail.Name())
+func (sof *SendOutOnlyFilter) Filter(mail mailfile.Mail) Result {
+	log.Printf("Run %s, Mail:%s\n", sof, mail.Name())
 
 	sendOut := false
 	for _, address := range mail.To() {
-		if !strings.HasSuffix(address.Address, soh.localDomain) {
+		if !strings.HasSuffix(address.Address, sof.localDomain) {
 			sendOut = true
 			break
 		}
 	}
 
 	if !sendOut {
-		return Result(soh.destFolder + ps + mail.Name())
+		return Result(sof.destFolder + ps + mail.Name())
 	}
 
-	return soh.next.Filter(mail)
+	return sof.next.Filter(mail)
 }
 
-func (soh *SendOutOnlyFilter) String() string {
+func (sof *SendOutOnlyFilter) String() string {
 	return "SendOutOnlyFilter"
 }
 
