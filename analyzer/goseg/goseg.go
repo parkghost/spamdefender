@@ -2,9 +2,9 @@ package goseg
 
 /*
 forked from https://github.com/fxsjy/goseg
-removed artificial neural network
-use struct instead of map
-persistence of Tokenizer
+removed artificial neural network for reducing memeory usage and speed up
+add Tokenizer struct for configurable and serializable
+TrieTree use struct instead of map for reducing memeory usage(slightly lower lookup performance)
 */
 
 import (
@@ -50,7 +50,7 @@ func (tn *TrieNode) Lookup(Char rune) *TrieNode {
 	if n == 0 {
 		return nil
 	}
-
+	// binary search
 	l, r := 0, n-1
 	for {
 		m := (l + r) / 2
@@ -89,7 +89,7 @@ func (tn *TrieNode) addChild(Char rune) *TrieNode {
 	if n == 0 {
 		tn.Children = append(tn.Children, node)
 	} else {
-		// sorting
+		// add node to sorted slice
 		for i := 0; i < n; i++ {
 			child := tn.Children[i]
 			if Char < child.Char {
