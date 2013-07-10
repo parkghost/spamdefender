@@ -30,9 +30,9 @@ type BayesianAnalyzer struct {
 
 func (a *BayesianAnalyzer) Test(text string) string {
 	words := common.Normalize(a.tokenizer.Cut([]rune(text)), cutset)
-	score, likely, _ := a.classifier.LogScores(words)
+	scores, likely, strict := a.classifier.LogScores(words)
 
-	if math.Abs(score[ClassIdxOfGood]/score[ClassIdxOfBad]-1) < Threshold {
+	if !strict || math.Abs(scores[ClassIdxOfGood]/scores[ClassIdxOfBad]-1) < Threshold {
 		return Neutral
 	}
 

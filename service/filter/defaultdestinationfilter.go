@@ -19,6 +19,6 @@ func (ddf *DefaultDestinationFilter) String() string {
 	return "DefaultDestinationFilter"
 }
 
-func NewDefaultDestination(destFolder string) Filter {
+func NewDefaultDestinationFilter(destFolder string) Filter {
 	return &DefaultDestinationFilter{destFolder}
 }

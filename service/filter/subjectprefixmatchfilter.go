@@ -26,6 +26,6 @@ func (spmf *SubjectPrefixMatchFilter) String() string {
 	return "SubjectPrefixMatchFilter"
 }
 
-func NewSubjectPrefixMatch(next Filter, subjectPrefix string, destFolder string) Filter {
+func NewSubjectPrefixMatchFilter(next Filter, subjectPrefix string, destFolder string) Filter {
 	return &SubjectPrefixMatchFilter{next, subjectPrefix, destFolder}
 }

@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-type CacheFilter struct {
+type CachingFilter struct {
 	next Filter
 	rwm  *sync.RWMutex
 	l    *list.List
@@ -19,7 +19,7 @@ type Tuple struct {
 	result  Result
 }
 
-func (cf *CacheFilter) Filter(mail mailfile.Mail) Result {
+func (cf *CachingFilter) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", cf, mail.Name())
 
 	subject := mail.Subject()
@@ -47,10 +47,10 @@ func (cf *CacheFilter) Filter(mail mailfile.Mail) Result {
 	return result
 }
 
-func (cf *CacheFilter) String() string {
-	return "CacheFilter"
+func (cf *CachingFilter) String() string {
+	return "CachingFilter"
 }
 
-func NewCache(next Filter, size int) Filter {
-	return &CacheFilter{next, &sync.RWMutex{}, list.New(), size}
+func NewCachingFilter(next Filter, size int) Filter {
+	return &CachingFilter{next, &sync.RWMutex{}, list.New(), size}
 }

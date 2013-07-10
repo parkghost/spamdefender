@@ -6,6 +6,7 @@ import (
 	"code.google.com/p/go.net/html/atom"
 	"errors"
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -60,7 +61,7 @@ loop:
 		case tokenType == html.ErrorToken:
 			break loop
 		case z.Err() != nil:
-			fmt.Println(z.Err())
+			log.Printf("html: %v\n", z.Err())
 			break loop
 		}
 	}

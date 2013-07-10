@@ -34,6 +34,6 @@ func (sof *SendOutOnlyFilter) String() string {
 	return "SendOutOnlyFilter"
 }
 
-func NewSendOutOnly(next Filter, localDomain string, destFolder string) Filter {
+func NewSendOutOnlyFilter(next Filter, localDomain string, destFolder string) Filter {
 	return &SendOutOnlyFilter{next, localDomain, destFolder}
 }

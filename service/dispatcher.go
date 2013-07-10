@@ -12,6 +12,10 @@ type Waiter interface {
 	Wait()
 }
 
+type Handler interface {
+	Handle(string)
+}
+
 type PooledDispatcher struct {
 	handler   Handler
 	wg        *sync.WaitGroup
@@ -23,7 +27,6 @@ func (d *PooledDispatcher) Dispatch(filePath string) {
 	d.semaphore <- true
 	go func() {
 		d.handler.Handle(filePath)
-
 		d.wg.Done()
 		<-d.semaphore
 	}()

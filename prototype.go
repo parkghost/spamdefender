@@ -37,13 +37,13 @@ func main() {
 	log.Println("Starting daemon")
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	defaultDestination := filter.NewDefaultDestination(incomingFolder)
-	contentInspection := filter.NewContentInspection(defaultDestination, allPass, quarantineFolder, traningDataFilePath, dictDataFilePath)
-	subjectPrefixMatch := filter.NewSubjectPrefixMatch(contentInspection, subjectPrefix, incomingFolder)
-	sendOutOnly := filter.NewSendOutOnly(subjectPrefixMatch, localDomain, incomingFolder)
-	cache := filter.NewCache(sendOutOnly, cacheSize)
+	defaultDestinationFilter := filter.NewDefaultDestinationFilter(incomingFolder)
+	contentInspectionFilter := filter.NewContentInspectionFilter(defaultDestinationFilter, allPass, quarantineFolder, traningDataFilePath, dictDataFilePath)
+	subjectPrefixMatchFilter := filter.NewSubjectPrefixMatchFilter(contentInspectionFilter, subjectPrefix, incomingFolder)
+	sendOutOnlyFilter := filter.NewSendOutOnlyFilter(subjectPrefixMatchFilter, localDomain, incomingFolder)
+	cachingFilter := filter.NewCachingFilter(sendOutOnlyFilter, cacheSize)
 
-	handlerAdapter := filter.NewFileHandlerAdapter(cache, &mailfile.POP3MailFileFactory{})
+	handlerAdapter := filter.NewFileHandlerAdapter(cachingFilter, &mailfile.POP3MailFileFactory{})
 	dispatcher := service.NewPooledDispatcher(handlerAdapter, numOfProcessor)
 
 	monitor := service.NewFolderMonitor(holdFolder, folderScanInterval, dispatcher)

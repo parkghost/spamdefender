@@ -36,7 +36,7 @@ func (cif *ContentInspectionFilter) String() string {
 	return "ContentInspectionFilter"
 }
 
-func NewContentInspection(next Filter, allPass bool, quarantineFolder string, traningDataFilePath string, dictDataFilePath string) Filter {
+func NewContentInspectionFilter(next Filter, allPass bool, quarantineFolder string, traningDataFilePath string, dictDataFilePath string) Filter {
 	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictDataFilePath)
 	if err != nil {
 		log.Fatal(err)
