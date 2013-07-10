@@ -3,15 +3,19 @@ package filter
 import (
 	"container/list"
 	"github.com/parkghost/spamdefender/mailfile"
+	metrics "github.com/rcrowley/go-metrics"
 	"log"
 	"sync"
 )
 
 type CachingFilter struct {
-	next Filter
-	rwm  *sync.RWMutex
-	l    *list.List
-	size int
+	next   Filter
+	rwm    *sync.RWMutex
+	l      *list.List
+	size   int
+	total  metrics.Counter
+	hit    metrics.Counter
+	cached metrics.Gauge
 }
 
 type Tuple struct {
@@ -21,6 +25,7 @@ type Tuple struct {
 
 func (cf *CachingFilter) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", cf, mail.Name())
+	cf.total.Inc(1)
 
 	subject := mail.Subject()
 
@@ -29,6 +34,7 @@ func (cf *CachingFilter) Filter(mail mailfile.Mail) Result {
 		if t, ok := e.Value.(*Tuple); ok {
 			if subject == t.subject {
 				cf.rwm.RUnlock()
+				cf.hit.Inc(1)
 				return t.result
 			}
 		}
@@ -42,6 +48,7 @@ func (cf *CachingFilter) Filter(mail mailfile.Mail) Result {
 	if cf.l.Len() > cf.size {
 		cf.l.Remove(cf.l.Back())
 	}
+	cf.cached.Update(int64(cf.l.Len()))
 	cf.rwm.Unlock()
 
 	return result
@@ -52,5 +59,11 @@ func (cf *CachingFilter) String() string {
 }
 
 func NewCachingFilter(next Filter, size int) Filter {
-	return &CachingFilter{next, &sync.RWMutex{}, list.New(), size}
+	total := metrics.NewCounter()
+	hit := metrics.NewCounter()
+	cached := metrics.NewGauge()
+	metrics.Register("CachingFilter-Total", total)
+	metrics.Register("CachingFilter-Hit", hit)
+	metrics.Register("CachingFilter-Cached", cached)
+	return &CachingFilter{next, &sync.RWMutex{}, list.New(), size, total, hit, cached}
 }

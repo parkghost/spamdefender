@@ -3,10 +3,10 @@ bad
 neutral
 mailbox
 fakeQueues
+logs
+*.data
+*.pprof
 badtermfreq.txt
 goodtermfreq.txt
-bayesian.data
-dict.data
-*.pprof
 profilingtool.go
 spamdefender

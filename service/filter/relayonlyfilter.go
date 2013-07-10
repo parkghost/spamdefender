@@ -2,6 +2,7 @@ package filter
 
 import (
 	"github.com/parkghost/spamdefender/mailfile"
+	metrics "github.com/rcrowley/go-metrics"
 	"log"
 	"strings"
 )
@@ -10,15 +11,19 @@ type RelayOnlyFilter struct {
 	next        Filter
 	localDomain string
 	destFolder  string
+	total       metrics.Counter
+	numOfRelay  metrics.Counter
 }
 
 func (sof *RelayOnlyFilter) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", sof, mail.Name())
+	sof.total.Inc(1)
 
 	sendOut := false
 	for _, address := range mail.To() {
 		if !strings.HasSuffix(address.Address, sof.localDomain) {
 			sendOut = true
+			sof.numOfRelay.Inc(1)
 			break
 		}
 	}
@@ -35,5 +40,9 @@ func (sof *RelayOnlyFilter) String() string {
 }
 
 func NewRelayOnlyFilter(next Filter, localDomain string, destFolder string) Filter {
-	return &RelayOnlyFilter{next, localDomain, destFolder}
+	total := metrics.NewCounter()
+	numOfRelay := metrics.NewCounter()
+	metrics.Register("RelayOnlyFilter-Total", total)
+	metrics.Register("RelayOnlyFilter-Relay", numOfRelay)
+	return &RelayOnlyFilter{next, localDomain, destFolder, total, numOfRelay}
 }

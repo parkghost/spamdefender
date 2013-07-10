@@ -1,9 +1,9 @@
 package filter
 
 import (
-	"github.com/parkghost/spamdefender/common"
 	"github.com/parkghost/spamdefender/mailfile"
 	"github.com/parkghost/spamdefender/service"
+	metrics "github.com/rcrowley/go-metrics"
 	"log"
 	"os"
 	"path"
@@ -20,11 +20,15 @@ type Filter interface {
 type FileHandlerAdapter struct {
 	filter  Filter
 	factory mailfile.MailFileFactory
+	total   metrics.Counter
+	meter   metrics.Meter
 }
 
 func (fha *FileHandlerAdapter) Handle(filePath string) {
-	_, err := os.Stat(filePath)
+	fha.total.Inc(1)
+	f, err := os.Stat(filePath)
 	if err == nil {
+		fha.meter.Mark(f.Size())
 		mail := fha.factory.Create(filePath)
 
 		if err = mail.Parse(); err != nil {
@@ -33,16 +37,14 @@ func (fha *FileHandlerAdapter) Handle(filePath string) {
 			return
 		}
 
-		result := fha.filter.Filter(mail)
-		log.Printf("Move to %s, Mail:%s\n", result, mail.Name())
-		err = common.MoveFile(mail.Path(), string(result))
-		if err != nil {
-			log.Printf("FileHandlerAdapter: Err:%v, Mail:%s\n", err, mail.Name())
-		}
-
+		fha.filter.Filter(mail)
 	}
 }
 
 func NewFileHandlerAdapter(filter Filter, factory mailfile.MailFileFactory) service.Handler {
-	return &FileHandlerAdapter{filter, factory}
+	total := metrics.NewCounter()
+	meter := metrics.NewMeter()
+	metrics.Register("FileHandlerAdapter-Total", total)
+	metrics.Register("FileHandlerAdapter-Size", meter)
+	return &FileHandlerAdapter{filter, factory, total, meter}
 }

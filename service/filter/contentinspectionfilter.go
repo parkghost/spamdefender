@@ -4,6 +4,7 @@ import (
 	"github.com/parkghost/spamdefender/analyzer"
 	"github.com/parkghost/spamdefender/html"
 	"github.com/parkghost/spamdefender/mailfile"
+	metrics "github.com/rcrowley/go-metrics"
 	"log"
 )
 
@@ -12,10 +13,13 @@ type ContentInspectionFilter struct {
 	allPass          bool
 	quarantineFolder string
 	anlz             analyzer.Analyzer
+	total            metrics.Counter
+	counters         map[string]metrics.Counter
 }
 
 func (cif *ContentInspectionFilter) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", cif, mail.Name())
+	cif.total.Inc(1)
 
 	htmlText := mail.Content()
 	content, err := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
@@ -25,6 +29,7 @@ func (cif *ContentInspectionFilter) Filter(mail mailfile.Mail) Result {
 	}
 
 	class := cif.anlz.Test(content)
+	cif.counters[class].Inc(1)
 	if cif.allPass || analyzer.Good == class {
 		return cif.next.Filter(mail)
 	}
@@ -41,5 +46,13 @@ func NewContentInspectionFilter(next Filter, allPass bool, quarantineFolder stri
 	if err != nil {
 		log.Fatal(err)
 	}
-	return &ContentInspectionFilter{next, allPass, quarantineFolder, anlz}
+	total := metrics.NewCounter()
+	metrics.Register("ContentInspectionFilter-Total", total)
+	counters := make(map[string]metrics.Counter)
+	for _, class := range []string{analyzer.Good, analyzer.Bad, analyzer.Neutral} {
+		counter := metrics.NewCounter()
+		counters[class] = counter
+		metrics.Register("ContentInspectionFilter-"+class, counter)
+	}
+	return &ContentInspectionFilter{next, allPass, quarantineFolder, anlz, total, counters}
 }

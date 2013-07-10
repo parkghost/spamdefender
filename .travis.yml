@@ -6,6 +6,7 @@ install:
   - go get github.com/djimenez/iconv-go
   - go get github.com/d3xter/GoPOP3
   - go get code.google.com/p/go.net/html
+  - go get github.com/rcrowley/go-metrics
   - go get github.com/mgutz/ansi
 script:
   - pushd $TRAVIS_BUILD_DIR
