@@ -14,9 +14,9 @@ import (
 const ps = string(os.PathSeparator)
 
 var (
-	allPass       = false
-	localDomain   = "javaworld.com.tw"
-	subjectPrefix = "JWorld@TW新話題通知"
+	allPass         = false
+	localDomain     = "javaworld.com.tw"
+	subjectPrefixes = []string{"JWorld@TW新話題通知", "JWorld@TW話題更新通知", "JWorld@TW新文章通知"}
 
 	//baseFolder = "/var/spool/postfix/"
 	baseFolder       = "fakeQueues" + ps
@@ -33,15 +33,15 @@ var (
 )
 
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	startTime := time.Now()
 	log.Println("Starting daemon")
-	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	defaultDestinationFilter := filter.NewDefaultDestinationFilter(incomingFolder)
 	contentInspectionFilter := filter.NewContentInspectionFilter(defaultDestinationFilter, allPass, quarantineFolder, traningDataFilePath, dictDataFilePath)
-	subjectPrefixMatchFilter := filter.NewSubjectPrefixMatchFilter(contentInspectionFilter, subjectPrefix, incomingFolder)
-	sendOutOnlyFilter := filter.NewSendOutOnlyFilter(subjectPrefixMatchFilter, localDomain, incomingFolder)
-	cachingFilter := filter.NewCachingFilter(sendOutOnlyFilter, cacheSize)
+	subjectPrefixMatchFilter := filter.NewSubjectPrefixMatchFilter(contentInspectionFilter, subjectPrefixes, incomingFolder)
+	relayOnlyFilter := filter.NewRelayOnlyFilter(subjectPrefixMatchFilter, localDomain, incomingFolder)
+	cachingFilter := filter.NewCachingFilter(relayOnlyFilter, cacheSize)
 
 	handlerAdapter := filter.NewFileHandlerAdapter(cachingFilter, &mailfile.POP3MailFileFactory{})
 	dispatcher := service.NewPooledDispatcher(handlerAdapter, numOfProcessor)

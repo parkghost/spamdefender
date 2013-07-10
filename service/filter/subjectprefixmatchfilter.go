@@ -7,15 +7,23 @@ import (
 )
 
 type SubjectPrefixMatchFilter struct {
-	next          Filter
-	subjectPrefix string
-	destFolder    string
+	next            Filter
+	subjectPrefixes []string
+	destFolder      string
 }
 
 func (spmf *SubjectPrefixMatchFilter) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", spmf, mail.Name())
 
-	if !strings.HasPrefix(mail.Subject(), spmf.subjectPrefix) {
+	matched := false
+	for _, subjectPrefix := range spmf.subjectPrefixes {
+		if strings.HasPrefix(mail.Subject(), subjectPrefix) {
+			matched = true
+			break
+		}
+	}
+
+	if !matched {
 		return Result(spmf.destFolder + ps + mail.Name())
 	}
 
@@ -26,6 +34,6 @@ func (spmf *SubjectPrefixMatchFilter) String() string {
 	return "SubjectPrefixMatchFilter"
 }
 
-func NewSubjectPrefixMatchFilter(next Filter, subjectPrefix string, destFolder string) Filter {
-	return &SubjectPrefixMatchFilter{next, subjectPrefix, destFolder}
+func NewSubjectPrefixMatchFilter(next Filter, subjectPrefixes []string, destFolder string) Filter {
+	return &SubjectPrefixMatchFilter{next, subjectPrefixes, destFolder}
 }

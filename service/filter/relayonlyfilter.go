@@ -6,13 +6,13 @@ import (
 	"strings"
 )
 
-type SendOutOnlyFilter struct {
+type RelayOnlyFilter struct {
 	next        Filter
 	localDomain string
 	destFolder  string
 }
 
-func (sof *SendOutOnlyFilter) Filter(mail mailfile.Mail) Result {
+func (sof *RelayOnlyFilter) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", sof, mail.Name())
 
 	sendOut := false
@@ -30,10 +30,10 @@ func (sof *SendOutOnlyFilter) Filter(mail mailfile.Mail) Result {
 	return sof.next.Filter(mail)
 }
 
-func (sof *SendOutOnlyFilter) String() string {
-	return "SendOutOnlyFilter"
+func (sof *RelayOnlyFilter) String() string {
+	return "RelayOnlyFilter"
 }
 
-func NewSendOutOnlyFilter(next Filter, localDomain string, destFolder string) Filter {
-	return &SendOutOnlyFilter{next, localDomain, destFolder}
+func NewRelayOnlyFilter(next Filter, localDomain string, destFolder string) Filter {
+	return &RelayOnlyFilter{next, localDomain, destFolder}
 }
