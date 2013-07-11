@@ -6,6 +6,7 @@ import (
 	"code.google.com/p/go.net/html/atom"
 	"errors"
 	"fmt"
+	"io"
 	"log"
 	"strings"
 )
@@ -45,23 +46,23 @@ func ExtractText(htmlText string, remover func(string) (string, error)) (string,
 loop:
 	for {
 		tokenType := z.Next()
-		switch {
-		case tokenType == html.StartTagToken:
+		switch tokenType {
+		case html.StartTagToken:
 			if z.Token().DataAtom == atom.Body {
 				bodyBlock = true
 			}
-		case tokenType == html.EndTagToken:
+		case html.EndTagToken:
 			if z.Token().DataAtom == atom.Body {
 				bodyBlock = false
 			}
-		case tokenType == html.TextToken:
+		case html.TextToken:
 			if bodyBlock {
 				buf.Write(z.Text())
 			}
-		case tokenType == html.ErrorToken:
-			break loop
-		case z.Err() != nil:
-			log.Printf("html: %v\n", z.Err())
+		case html.ErrorToken:
+			if z.Err() != io.EOF {
+				log.Printf("html: %v\n", z.Err())
+			}
 			break loop
 		}
 	}
