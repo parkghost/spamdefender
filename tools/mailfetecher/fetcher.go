@@ -1,18 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"bytes"
-	"crypto/tls"
 	"fmt"
-	pop3 "github.com/d3xter/GoPOP3"
+	pop3 "github.com/bytbox/go-pop3"
+	"github.com/parkghost/pkg/net/mail"
 	"github.com/parkghost/spamdefender/common"
 	"io/ioutil"
 	"log"
-	"net/mail"
 	"os"
 	"strconv"
-	"strings"
 )
 
 var (
@@ -22,27 +19,25 @@ var (
 	secure        = true
 	destination   = "mailbox"
 	mailFrom      = "webmaster@mail.javaworld.com.tw"
-	start         = 0
+	offset        = 0
 )
 
-// TODO: retry download when failure
-// TODO: multi-client for speed up
+// TODO: retry download on failure
 
 func main() {
 
 	log.Printf("Connect to %s\n", serverAddress)
+
 	var client *pop3.Client
 	var dialErr error
 	if secure {
-		client, dialErr = DialTLS(serverAddress)
+		client, dialErr = pop3.DialTLS(serverAddress)
 	} else {
 		client, dialErr = pop3.Dial(serverAddress)
 	}
 	checkErr(dialErr)
 
-	log.Println("Authenticating")
-	plainAuth := pop3.CreatePlainAuthentication(username, password)
-	authErr := client.Authenticate(plainAuth)
+	authErr := client.Auth(username, password)
 	checkErr(authErr)
 
 	log.Println("Fetching mailbox stat")
@@ -57,16 +52,6 @@ func main() {
 
 }
 
-func DialTLS(addr string) (client *pop3.Client, err error) {
-	conn, err := tls.Dial("tcp", addr, nil)
-	if err != nil {
-		return nil, err
-	}
-	host := addr[:strings.Index(addr, ":")]
-
-	return pop3.NewClient(conn, host)
-}
-
 func checkErr(err error) {
 	if err != nil {
 		log.Fatal(err)
@@ -74,7 +59,7 @@ func checkErr(err error) {
 }
 
 func PrintMailBoxStat(client *pop3.Client) error {
-	mailCount, mailBoxSize, err := client.GetStatus()
+	mailCount, mailBoxSize, err := client.Stat()
 	if err != nil {
 		return err
 	}
@@ -84,61 +69,28 @@ func PrintMailBoxStat(client *pop3.Client) error {
 }
 
 func ScanMailbox(client *pop3.Client) error {
-	rawMailList, respErr := client.GetRawMailList()
-	checkErr(respErr)
+	msgs, _, err := client.ListAll()
+	checkErr(err)
 
-	scanner := bufio.NewScanner(strings.NewReader(rawMailList))
-	scanner.Split(ScanFirstWordAtLine)
-
-	lastNo := 0
-	for scanner.Scan() {
-		if scanner.Err() == nil {
-			index, err := strconv.Atoi(scanner.Text())
-			if err != nil {
-				log.Fatalf("Stop scan due to Err:%v, Token:%s", err, scanner.Text())
-			}
-
-			if index >= start {
-				err = CheckAndDownloadMailContent(client, index)
-				if err != nil {
-					log.Fatalf("Download mail failure, Err:%v, No:%d, ", err, index)
-				}
-				lastNo = index
-			}
-		} else {
-			log.Fatalf("Stop scan due to Err:%v, lastNo:%d", scanner.Err(), lastNo)
-			break
+	for i := offset; i < len(msgs); i++ {
+		err = CheckAndDownloadMailContent(client, msgs[i])
+		if err != nil {
+			log.Fatalf("Download mail failure, Err:%v, Mail:%d, ", err, msgs[i])
 		}
 	}
-	return nil
-}
 
-func ScanFirstWordAtLine(data []byte, atEOF bool) (advance int, token []byte, err error) {
-	if atEOF && len(data) == 0 {
-		return 0, nil, nil
-	}
-	if i := bytes.IndexByte(data, '\n'); i >= 0 {
-		_, t, e := bufio.ScanWords(data, atEOF)
-		return i + 1, t, e
-	}
-	// If we're at EOF, we have a final, non-terminated line. Return it.
-	if atEOF {
-		_, t, e := bufio.ScanWords(data, atEOF)
-		return len(data), t, e
-	}
-	// Request more data.
-	return 0, nil, nil
+	return nil
 }
 
 func CheckAndDownloadMailContent(client *pop3.Client, index int) (err error) {
 	filePath := destination + string(os.PathSeparator) + strconv.Itoa(index)
 	if _, errFileStat := os.Stat(filePath); errFileStat != nil { // mail file not found
 
-		log.Printf("Downloading mail, No:%d", index)
-		// TODO: store binary file or handle non-utf8 encoding
+		log.Printf("Downloading Mail:%d", index)
+		// TODO: handle non-utf8 encoding
 		// THINK: check content integrity
 		var mailContent string
-		mailContent, err = client.GetRawMail(index)
+		mailContent, err = client.Retr(index)
 		if err != nil {
 			return
 		}
@@ -157,7 +109,7 @@ func CheckAndDownloadMailContent(client *pop3.Client, index int) (err error) {
 		fromAddress, _ := getFromAddress(rawMailContent)
 
 		if fromAddress == mailFrom {
-			log.Printf("store mail content to file:%s", filePath)
+			log.Printf("Store mail content to file:%s", filePath)
 			err = ioutil.WriteFile(filePath, rawMailContent, 0644)
 			if err != nil {
 				return
