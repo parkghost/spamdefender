@@ -2,7 +2,7 @@ package mailfile
 
 import (
 	"bytes"
-	"net/mail"
+	"github.com/parkghost/pkg/net/mail"
 	"os/exec"
 	"path"
 )

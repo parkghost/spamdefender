@@ -3,12 +3,11 @@ package mailfile
 import (
 	"bytes"
 	iconv "github.com/djimenez/iconv-go"
-	"net/mail"
+	"github.com/parkghost/pkg/net/mail"
 	"strings"
 )
 
 // TODO: write unit-test for To and From methods
-// THINK: From and To support multi-charset
 
 type Mail interface {
 	Name() string

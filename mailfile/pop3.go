@@ -1,7 +1,7 @@
 package mailfile
 
 import (
-	"net/mail"
+	"github.com/parkghost/pkg/net/mail"
 	"os"
 	"path"
 )
