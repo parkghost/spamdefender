@@ -3,6 +3,7 @@ package mailfile
 import (
 	"bytes"
 	"github.com/parkghost/pkg/net/mail"
+	"io"
 	"os/exec"
 	"path"
 )
@@ -15,7 +16,7 @@ var (
 type PostfixMail struct {
 	filePath string
 	subject  string
-	content  string
+	content  io.Reader
 	from     *mail.Address
 	to       []*mail.Address
 }
@@ -33,7 +34,7 @@ func (m *PostfixMail) Subject() string {
 	return m.subject
 }
 
-func (m *PostfixMail) Content() string {
+func (m *PostfixMail) Content() io.Reader {
 	return m.content
 }
 
@@ -84,6 +85,10 @@ func (m *PostfixMail) Parse() (err error) {
 	}
 
 	return
+}
+
+func (m *PostfixMail) Close() error {
+	return nil
 }
 
 func (m *PostfixMail) String() string {

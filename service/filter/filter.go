@@ -42,6 +42,7 @@ func (fha *FileHandlerAdapter) Handle(filePath string) {
 			log.Printf("FileHandlerAdapter: Err:%v, Mail:%s\n", err, mailName)
 			return
 		}
+		defer mail.Close()
 
 		fha.filter.Filter(mail)
 	}

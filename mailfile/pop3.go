@@ -2,14 +2,16 @@ package mailfile
 
 import (
 	"github.com/parkghost/pkg/net/mail"
+	"io"
 	"os"
 	"path"
 )
 
 type POP3Mail struct {
 	filePath string
+	fd       *os.File
 	subject  string
-	content  string
+	content  io.Reader
 	from     *mail.Address
 	to       []*mail.Address
 }
@@ -27,7 +29,7 @@ func (m *POP3Mail) Subject() string {
 	return m.subject
 }
 
-func (m *POP3Mail) Content() string {
+func (m *POP3Mail) Content() io.Reader {
 	return m.content
 }
 
@@ -41,13 +43,12 @@ func (m *POP3Mail) To() []*mail.Address {
 
 func (m *POP3Mail) Parse() (err error) {
 
-	fs, err := os.Open(m.filePath)
+	m.fd, err = os.Open(m.filePath)
 	if err != nil {
 		return
 	}
-	defer fs.Close()
 
-	message, err := mail.ReadMessage(fs)
+	message, err := mail.ReadMessage(m.fd)
 	if err != nil {
 		return
 	}
@@ -73,6 +74,13 @@ func (m *POP3Mail) Parse() (err error) {
 	}
 
 	return
+}
+
+func (m *POP3Mail) Close() error {
+	if m.fd != nil {
+		return m.fd.Close()
+	}
+	return nil
 }
 
 func (m *POP3Mail) String() string {

@@ -54,6 +54,7 @@ func main() {
 		if err != nil {
 			fmt.Println(err)
 		}
+		mail.Close()
 
 		class := anlz.Test(content)
 

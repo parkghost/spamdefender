@@ -17,24 +17,23 @@ var testdata = struct {
 }
 
 func TestExtractText(t *testing.T) {
-	raw, err := ioutil.ReadFile(testdata.original)
-	if err != nil {
-		t.Fatal(err)
-	}
-	originalText := string(raw)
-
-	raw, err = ioutil.ReadFile(testdata.expected)
-	if err != nil {
-		t.Fatal(err)
-	}
-	expectedText := string(raw)
-
-	newText, err := ExtractText(originalText, BannerRemover("----------", 0, 1))
+	originalFile, err := os.Open(testdata.original)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if expectedText != newText {
-		t.Fatalf("expected %s, got %s", expectedText, newText)
+	expectedBytes, err := ioutil.ReadFile(testdata.expected)
+	if err != nil {
+		t.Fatal(err)
+	}
+	expectedText := string(expectedBytes)
+
+	originalText, err := ExtractText(originalFile, BannerRemover("----------", 0, 1))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if expectedText != originalText {
+		t.Fatalf("expected %s, got %s", expectedText, originalText)
 	}
 }

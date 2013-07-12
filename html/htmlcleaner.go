@@ -37,8 +37,8 @@ func BannerRemover(lineSeparator string, skipTop int, skipBottom int) func(strin
 	}
 }
 
-func ExtractText(htmlText string, remover func(string) (string, error)) (string, error) {
-	z := html.NewTokenizer(strings.NewReader(htmlText))
+func ExtractText(reader io.Reader, remover func(string) (string, error)) (string, error) {
+	z := html.NewTokenizer(reader)
 
 	var buf bytes.Buffer
 	bodyBlock := false

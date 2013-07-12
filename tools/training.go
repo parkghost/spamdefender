@@ -67,6 +67,7 @@ func main() {
 
 			htmlText := mail.Content()
 			content, _ := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
+			mail.Close()
 
 			words := common.Normalize(tokenizer.Cut([]rune(content)), cutset)
 			classifier.Learn(words, item.class)

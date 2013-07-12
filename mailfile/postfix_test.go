@@ -1,6 +1,7 @@
 package mailfile
 
 import (
+	"io/ioutil"
 	"os"
 	"strings"
 	"testing"
@@ -22,6 +23,7 @@ func TestPostfixRetrieveSubject(t *testing.T) {
 	if err = mail.Parse(); err != nil {
 		t.Fatal(err)
 	}
+	defer mail.Close()
 
 	reader := NewPlainSourceReader(f)
 	subject, err := reader.ReadLine()
@@ -45,6 +47,7 @@ func TestPostfixRetrieveContent(t *testing.T) {
 	if err = mail.Parse(); err != nil {
 		t.Fatal(err)
 	}
+	defer mail.Close()
 
 	reader := NewPlainSourceReader(f)
 	_, err = reader.ReadLine()
@@ -57,7 +60,11 @@ func TestPostfixRetrieveContent(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	gotBodyConent := strings.Trim(mail.Content(), "\t\r\n")
+	bodyBytes, err := ioutil.ReadAll(mail.Content())
+	if err != nil {
+		t.Fatal(err)
+	}
+	gotBodyConent := strings.Trim(string(bodyBytes), "\t\r\n")
 
 	if exptectedBodyContent != gotBodyConent {
 		t.Fatalf("expected mail content is \n%v\n, got %v", exptectedBodyContent, gotBodyConent)

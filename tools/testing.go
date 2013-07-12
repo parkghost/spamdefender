@@ -62,10 +62,8 @@ func main() {
 			}
 
 			htmlText := mail.Content()
-			content, err := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
-			if err != nil {
-				//ignore mail like Java Developer Day
-			}
+			content, _ := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
+			mail.Close()
 
 			class := anlz.Test(content)
 

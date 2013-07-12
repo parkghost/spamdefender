@@ -1,9 +1,9 @@
 package mailfile
 
 import (
-	"bytes"
 	iconv "github.com/djimenez/iconv-go"
 	"github.com/parkghost/pkg/net/mail"
+	"io"
 	"strings"
 )
 
@@ -13,10 +13,11 @@ type Mail interface {
 	Name() string
 	Path() string
 	Subject() string
-	Content() string
+	Content() io.Reader
 	From() *mail.Address
 	To() []*mail.Address
 	Parse() error
+	Close() error
 }
 
 func parseSubject(message *mail.Message) (string, error) {
@@ -31,26 +32,20 @@ func parseToAddress(message *mail.Message) ([]*mail.Address, error) {
 	return mail.ParseAddressList(message.Header.Get("To"))
 }
 
-func parseBoby(message *mail.Message) (text string, err error) {
+func parseBoby(message *mail.Message) (reader io.Reader, err error) {
 	//Content-Type: text/html;charset=UTF-8
 	contentType := message.Header.Get("Content-Type")
 	charset := contentType[strings.LastIndex(contentType, "=")+1:]
 
-	reader := message.Body
-	if charset != "UTF-8" {
+	reader = message.Body
+
+	if strings.ToLower(charset) != "utf-8" {
 		reader, err = iconv.NewReader(message.Body, charset, "UTF-8")
 		if err != nil {
-			return
+			return nil, err
 		}
 	}
 
-	bodyContent := &bytes.Buffer{}
-	_, err = bodyContent.ReadFrom(reader)
-	if err != nil {
-		return
-	}
-
-	text = bodyContent.String()
 	return
 }
 

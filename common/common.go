@@ -3,13 +3,14 @@ package common
 import (
 	"fmt"
 	"strings"
+	"unicode/utf8"
 )
 
 func Normalize(words []string, cutset string) []string {
-	var newWords []string
+	newWords := make([]string, 0, len(words))
 	for _, word := range words {
 		newWord := strings.ToLower(strings.Trim(word, cutset))
-		if len([]rune(newWord)) > 1 {
+		if utf8.RuneCountInString(newWord) > 1 {
 			newWords = append(newWords, newWord)
 		}
 	}
