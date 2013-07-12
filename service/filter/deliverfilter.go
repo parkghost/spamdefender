@@ -1,7 +1,6 @@
 package filter
 
 import (
-	"fmt"
 	"github.com/parkghost/spamdefender/common"
 	"github.com/parkghost/spamdefender/mailfile"
 	metrics "github.com/rcrowley/go-metrics"
