@@ -8,6 +8,8 @@ import (
 	"sync"
 )
 
+// TODO: option for content checksum 
+
 type CachingFilter struct {
 	next   Filter
 	rwm    *sync.RWMutex

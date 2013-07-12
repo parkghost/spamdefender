@@ -9,12 +9,11 @@ import (
 )
 
 type ContentInspectionFilter struct {
-	next             Filter
-	allPass          bool
-	quarantineFolder string
-	anlz             analyzer.Analyzer
-	total            metrics.Counter
-	counters         map[string]metrics.Counter
+	next     Filter
+	allPass  bool
+	anlz     analyzer.Analyzer
+	total    metrics.Counter
+	counters map[string]metrics.Counter
 }
 
 func (cif *ContentInspectionFilter) Filter(mail mailfile.Mail) Result {
@@ -34,14 +33,14 @@ func (cif *ContentInspectionFilter) Filter(mail mailfile.Mail) Result {
 		return cif.next.Filter(mail)
 	}
 
-	return Result(cif.quarantineFolder + ps + mail.Name())
+	return Quarantine
 }
 
 func (cif *ContentInspectionFilter) String() string {
 	return "ContentInspectionFilter"
 }
 
-func NewContentInspectionFilter(next Filter, allPass bool, quarantineFolder string, traningDataFilePath string, dictDataFilePath string) Filter {
+func NewContentInspectionFilter(next Filter, allPass bool, traningDataFilePath string, dictDataFilePath string) Filter {
 	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictDataFilePath)
 	if err != nil {
 		log.Fatal(err)
@@ -54,5 +53,5 @@ func NewContentInspectionFilter(next Filter, allPass bool, quarantineFolder stri
 		counters[class] = counter
 		metrics.Register("ContentInspectionFilter-"+class, counter)
 	}
-	return &ContentInspectionFilter{next, allPass, quarantineFolder, anlz, total, counters}
+	return &ContentInspectionFilter{next, allPass, anlz, total, counters}
 }

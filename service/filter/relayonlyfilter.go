@@ -10,7 +10,6 @@ import (
 type RelayOnlyFilter struct {
 	next        Filter
 	localDomain string
-	destFolder  string
 	total       metrics.Counter
 	numOfRelay  metrics.Counter
 }
@@ -29,7 +28,7 @@ func (sof *RelayOnlyFilter) Filter(mail mailfile.Mail) Result {
 	}
 
 	if !sendOut {
-		return Result(sof.destFolder + ps + mail.Name())
+		return Incoming
 	}
 
 	return sof.next.Filter(mail)
@@ -39,10 +38,10 @@ func (sof *RelayOnlyFilter) String() string {
 	return "RelayOnlyFilter"
 }
 
-func NewRelayOnlyFilter(next Filter, localDomain string, destFolder string) Filter {
+func NewRelayOnlyFilter(next Filter, localDomain string) Filter {
 	total := metrics.NewCounter()
 	numOfRelay := metrics.NewCounter()
 	metrics.Register("RelayOnlyFilter-Total", total)
 	metrics.Register("RelayOnlyFilter-Relay", numOfRelay)
-	return &RelayOnlyFilter{next, localDomain, destFolder, total, numOfRelay}
+	return &RelayOnlyFilter{next, localDomain, total, numOfRelay}
 }

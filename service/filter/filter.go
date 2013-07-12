@@ -9,9 +9,15 @@ import (
 	"path"
 )
 
+const (
+	None       = Result(0)
+	Incoming   = Result(1)
+	Quarantine = Result(2)
+)
+
 const ps = string(os.PathSeparator)
 
-type Result string
+type Result int
 
 type Filter interface {
 	Filter(mailfile.Mail) Result

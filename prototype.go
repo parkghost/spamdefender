@@ -25,12 +25,13 @@ var (
 	dictDataFilePath    = "data" + ps + "dict.data"
 
 	allPass         = false
-	subjectPrefixes = []string{"JWorld@TW新話題通知", "JWorld@TW話題更新通知", "JWorld@TW新文章通知"}
+	subjectPrefixes = []string{"JWorld@TW新話題通知"}
 	localDomain     = "javaworld.com.tw"
 	cacheSize       = 100
 
-	numOfProcessor     = 100
-	folderScanInterval = time.Duration(1) * time.Second
+	defaultMailFileFactory = &mailfile.POP3MailFileFactory{}
+	numOfProcessor         = 100
+	folderScanInterval     = time.Duration(1) * time.Second
 
 	logsFolder             = "logs"
 	metricLog              = logsFolder + ps + "metric.log"
@@ -41,41 +42,71 @@ var (
 func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	sdl, err := os.OpenFile(spamdefenderLog, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
+	startTime := time.Now()
+	initDefaultLogger()
+
+	log.Println("Starting daemon")
+	startService()
+	log.Printf("Daemon startup in %s", time.Since(startTime))
+
+	waitForExit()
+	log.Println("Stopping daemon")
+	service.Shutdown()
+	log.Println("Daemon stopped")
+}
+
+func initDefaultLogger() {
+	sdl, err := os.OpenFile(spamdefenderLog, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer sdl.Close()
 	log.SetOutput(sdl)
 
-	startTime := time.Now()
-	log.Println("Starting daemon")
+	service.AddShutdownHook(func() {
+		sdl.Close()
+	})
+}
 
-	defaultDestinationFilter := filter.NewDefaultDestinationFilter(incomingFolder)
-	contentInspectionFilter := filter.NewContentInspectionFilter(defaultDestinationFilter, allPass, quarantineFolder, traningDataFilePath, dictDataFilePath)
-	subjectPrefixMatchFilter := filter.NewSubjectPrefixMatchFilter(contentInspectionFilter, subjectPrefixes, incomingFolder)
-	relayOnlyFilter := filter.NewRelayOnlyFilter(subjectPrefixMatchFilter, localDomain, incomingFolder)
+func startService() {
+
+	defaultDestinationFilter := filter.NewDefaultDestinationFilter()
+	contentInspectionFilter := filter.NewContentInspectionFilter(defaultDestinationFilter, allPass, traningDataFilePath, dictDataFilePath)
+	subjectPrefixMatchFilter := filter.NewSubjectPrefixMatchFilter(contentInspectionFilter, subjectPrefixes)
+	relayOnlyFilter := filter.NewRelayOnlyFilter(subjectPrefixMatchFilter, localDomain)
 	cachingFilter := filter.NewCachingFilter(relayOnlyFilter, cacheSize)
-	deliverFilter := filter.NewDeliverFilter(cachingFilter)
 
-	handlerAdapter := filter.NewFileHandlerAdapter(deliverFilter, &mailfile.POP3MailFileFactory{})
+	paths := make(map[filter.Result]string)
+	paths[filter.Incoming] = incomingFolder
+	paths[filter.Quarantine] = quarantineFolder
+	deliverFilter := filter.NewDeliverFilter(cachingFilter, paths)
+
+	handlerAdapter := filter.NewFileHandlerAdapter(deliverFilter, defaultMailFileFactory)
+
 	dispatcher := service.NewPooledDispatcher(handlerAdapter, numOfProcessor)
 	monitor := service.NewFolderMonitor(holdFolder, folderScanInterval, dispatcher)
-	log.Printf("Daemon startup in %s", time.Since(startTime))
-	monitor.Start()
 
+	startMetric()
+	monitor.Start()
+	service.AddShutdownHook(func() {
+		monitor.Stop()
+	})
+
+}
+
+func startMetric() {
 	ml, err := os.OpenFile(metricLog, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer ml.Close()
-	go metrics.Log(metrics.DefaultRegistry, writeMetricLogInterval, log.New(ml, "metrics: ", log.Lmicroseconds))
+	service.AddShutdownHook(func() {
+		ml.Close()
+	})
 
+	go metrics.Log(metrics.DefaultRegistry, writeMetricLogInterval, log.New(ml, "metrics: ", log.Lmicroseconds))
+}
+
+func waitForExit() {
 	userInterrupt := make(chan os.Signal, 1)
 	signal.Notify(userInterrupt, os.Interrupt)
 	<-userInterrupt
-
-	log.Println("Stopping daemon")
-	monitor.Stop()
-	log.Println("Daemon stopped")
 }
