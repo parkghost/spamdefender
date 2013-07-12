@@ -39,7 +39,6 @@ func (tn *TrieNode) String() string {
 			buf.WriteRune(node.Char)
 			buf.WriteString(":" + node.String())
 		}
-
 	}
 	buf.WriteString("]")
 	return buf.String()
@@ -53,6 +52,10 @@ func (tn *TrieNode) Lookup(Char rune) *TrieNode {
 	// binary search
 	l, r := 0, n-1
 	for {
+		if l > r {
+			return nil
+		}
+
 		m := (l + r) / 2
 		c := tn.Children[m].Char
 		if c == Char {
@@ -61,10 +64,6 @@ func (tn *TrieNode) Lookup(Char rune) *TrieNode {
 			r = m - 1
 		} else {
 			l = m + 1
-		}
-
-		if l > r {
-			return nil
 		}
 	}
 }
@@ -83,28 +82,41 @@ func (tn *TrieNode) AddString(word string) *TrieNode {
 }
 
 func (tn *TrieNode) addChild(Char rune) *TrieNode {
-	node := &TrieNode{Children: make([]*TrieNode, 0), Char: Char}
 
 	n := len(tn.Children)
 	if n == 0 {
+		node := &TrieNode{Children: make([]*TrieNode, 0), Char: Char}
+		tn.Children = append(tn.Children, node)
+		return node
+	}
+
+	// binary insert
+	l, r := 0, n-1
+	for {
+		if l > r {
+			break
+		}
+
+		m := (l + r) / 2
+		c := tn.Children[m].Char
+		if c == Char {
+			return tn.Children[m]
+		} else if c > Char {
+			r = m - 1
+		} else {
+			l = m + 1
+		}
+	}
+
+	node := &TrieNode{Children: make([]*TrieNode, 0), Char: Char}
+	if l == n {
 		tn.Children = append(tn.Children, node)
 	} else {
-		// add node to sorted slice
-		for i := 0; i < n; i++ {
-			child := tn.Children[i]
-			if Char < child.Char {
-				newChildren := make([]*TrieNode, 0, len(tn.Children)+1)
-				newChildren = append(newChildren, tn.Children[:i]...)
-				newChildren = append(newChildren, node)
-				newChildren = append(newChildren, tn.Children[i:]...)
-				tn.Children = newChildren
-				break
-			}
-
-			if i == n-1 {
-				tn.Children = append(tn.Children, node)
-			}
-		}
+		newChildren := make([]*TrieNode, 0, n+1)
+		newChildren = append(newChildren, tn.Children[:l]...)
+		newChildren = append(newChildren, node)
+		newChildren = append(newChildren, tn.Children[l:]...)
+		tn.Children = newChildren
 	}
 	return node
 }
