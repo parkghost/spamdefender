@@ -81,10 +81,10 @@ func NewCachingProxy(target Filter, size int) Filter {
 	hit := metrics.NewCounter()
 	cached := metrics.NewGauge()
 
-	nextFilterName := fmt.Sprintf("%s", target)
+	targetName := fmt.Sprintf("%s", target)
 
-	metrics.Register("CachingProxy("+nextFilterName+")-Total", total)
-	metrics.Register("CachingProxy("+nextFilterName+")-Hit", hit)
-	metrics.Register("CachingProxy("+nextFilterName+")-Cached", cached)
+	metrics.Register("CachingProxy("+targetName+")-Total", total)
+	metrics.Register("CachingProxy("+targetName+")-Hit", hit)
+	metrics.Register("CachingProxy("+targetName+")-Cached", cached)
 	return &CachingProxy{target, &sync.RWMutex{}, list.New(), size, total, hit, cached}
 }
