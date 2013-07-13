@@ -71,14 +71,14 @@ func startService() {
 
 	defaultDestinationFilter := filter.NewDefaultDestinationFilter()
 	contentInspectionFilter := filter.NewContentInspectionFilter(defaultDestinationFilter, allPass, traningDataFilePath, dictDataFilePath)
-	subjectPrefixMatchFilter := filter.NewSubjectPrefixMatchFilter(contentInspectionFilter, subjectPrefixes)
+	cachingProxy := filter.NewCachingProxy(contentInspectionFilter, cacheSize)
+	subjectPrefixMatchFilter := filter.NewSubjectPrefixMatchFilter(cachingProxy, subjectPrefixes)
 	relayOnlyFilter := filter.NewRelayOnlyFilter(subjectPrefixMatchFilter, localDomain)
-	cachingFilter := filter.NewCachingFilter(relayOnlyFilter, cacheSize)
 
 	paths := make(map[filter.Result]string)
 	paths[filter.Incoming] = incomingFolder
 	paths[filter.Quarantine] = quarantineFolder
-	deliverFilter := filter.NewDeliverFilter(cachingFilter, paths)
+	deliverFilter := filter.NewDeliverFilter(relayOnlyFilter, paths)
 
 	handlerAdapter := filter.NewFileHandlerAdapter(deliverFilter, defaultMailFileFactory)
 
@@ -102,7 +102,7 @@ func startMetric() {
 		ml.Close()
 	})
 
-	go metrics.Log(metrics.DefaultRegistry, writeMetricLogInterval, log.New(ml, "metrics: ", log.Lmicroseconds))
+	go metrics.Log(metrics.DefaultRegistry, writeMetricLogInterval, log.New(ml, "", log.LstdFlags))
 }
 
 func waitForExit() {

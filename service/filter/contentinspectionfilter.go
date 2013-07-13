@@ -9,20 +9,21 @@ import (
 )
 
 type ContentInspectionFilter struct {
-	next     Filter
-	allPass  bool
-	anlz     analyzer.Analyzer
-	total    metrics.Counter
-	counters map[string]metrics.Counter
+	next      Filter
+	allPass   bool
+	anlz      analyzer.Analyzer
+	total     metrics.Counter
+	malformed metrics.Counter
+	counters  map[string]metrics.Counter
 }
 
 func (cif *ContentInspectionFilter) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", cif, mail.Name())
 	cif.total.Inc(1)
 
-	htmlText := mail.Content()
-	content, err := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
+	content, err := html.ExtractText(mail.Content(), html.BannerRemover("----------", 0, 1))
 	if err != nil {
+		cif.malformed.Inc(1)
 		log.Printf("ContentInspectionFilter: Err:%v, Mail:%s\n", err, mail.Name())
 		return cif.next.Filter(mail)
 	}
@@ -34,6 +35,10 @@ func (cif *ContentInspectionFilter) Filter(mail mailfile.Mail) Result {
 	}
 
 	return Quarantine
+}
+
+func (cif *ContentInspectionFilter) Key(mail mailfile.Mail) string {
+	return mail.Subject()
 }
 
 func (cif *ContentInspectionFilter) String() string {
@@ -53,5 +58,8 @@ func NewContentInspectionFilter(next Filter, allPass bool, traningDataFilePath s
 		counters[class] = counter
 		metrics.Register("ContentInspectionFilter-"+class, counter)
 	}
-	return &ContentInspectionFilter{next, allPass, anlz, total, counters}
+	malformed := metrics.NewCounter()
+	metrics.Register("ContentInspectionFilter-Malformed", malformed)
+
+	return &ContentInspectionFilter{next, allPass, anlz, total, malformed, counters}
 }

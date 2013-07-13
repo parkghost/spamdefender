@@ -2,16 +2,15 @@ package filter
 
 import (
 	"container/list"
+	"fmt"
 	"github.com/parkghost/spamdefender/mailfile"
 	metrics "github.com/rcrowley/go-metrics"
 	"log"
 	"sync"
 )
 
-// TODO: option for content checksum 
-
-type CachingFilter struct {
-	next   Filter
+type CachingProxy struct {
+	target Filter
 	rwm    *sync.RWMutex
 	l      *list.List
 	size   int
@@ -20,21 +19,32 @@ type CachingFilter struct {
 	cached metrics.Gauge
 }
 
-type Tuple struct {
-	subject string
-	result  Result
+type CacheKey interface {
+	Key(mail mailfile.Mail) string
 }
 
-func (cf *CachingFilter) Filter(mail mailfile.Mail) Result {
+type CacheEntry struct {
+	key    string
+	result Result
+}
+
+func (cf *CachingProxy) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", cf, mail.Name())
 	cf.total.Inc(1)
 
-	subject := mail.Subject()
+	keyer, ok := cf.target.(CacheKey)
+
+	if !ok {
+		log.Fatalf("%s should implement CacheKey interface\n", cf.target)
+		return None
+	}
+
+	key := keyer.Key(mail)
 
 	cf.rwm.RLock()
 	for e := cf.l.Front(); e != nil; e = e.Next() {
-		if t, ok := e.Value.(*Tuple); ok {
-			if subject == t.subject {
+		if t, ok := e.Value.(*CacheEntry); ok {
+			if key == t.key {
 				cf.rwm.RUnlock()
 				cf.hit.Inc(1)
 				return t.result
@@ -43,10 +53,10 @@ func (cf *CachingFilter) Filter(mail mailfile.Mail) Result {
 	}
 	cf.rwm.RUnlock()
 
-	result := cf.next.Filter(mail)
+	result := cf.target.Filter(mail)
 
 	cf.rwm.Lock()
-	cf.l.PushFront(&Tuple{subject, result})
+	cf.l.PushFront(&CacheEntry{key, result})
 	if cf.l.Len() > cf.size {
 		cf.l.Remove(cf.l.Back())
 	}
@@ -56,16 +66,25 @@ func (cf *CachingFilter) Filter(mail mailfile.Mail) Result {
 	return result
 }
 
-func (cf *CachingFilter) String() string {
-	return "CachingFilter"
+func (cf *CachingProxy) String() string {
+	return fmt.Sprintf("CachingProxy(%s)", cf.target)
 }
 
-func NewCachingFilter(next Filter, size int) Filter {
+func NewCachingProxy(target Filter, size int) Filter {
+	_, ok := target.(CacheKey)
+	if !ok {
+		log.Fatalf("%s should implement CacheKey interface\n", target)
+		return nil
+	}
+
 	total := metrics.NewCounter()
 	hit := metrics.NewCounter()
 	cached := metrics.NewGauge()
-	metrics.Register("CachingFilter-Total", total)
-	metrics.Register("CachingFilter-Hit", hit)
-	metrics.Register("CachingFilter-Cached", cached)
-	return &CachingFilter{next, &sync.RWMutex{}, list.New(), size, total, hit, cached}
+
+	nextFilterName := fmt.Sprintf("%s", target)
+
+	metrics.Register("CachingProxy("+nextFilterName+")-Total", total)
+	metrics.Register("CachingProxy("+nextFilterName+")-Hit", hit)
+	metrics.Register("CachingProxy("+nextFilterName+")-Cached", cached)
+	return &CachingProxy{target, &sync.RWMutex{}, list.New(), size, total, hit, cached}
 }
