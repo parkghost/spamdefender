@@ -35,4 +35,10 @@ go build termfreq.go
 go build training.go
 go clean
 popd >/dev/null
+
+echo "build mailsender"
+pushd mailsender >/dev/null
+go build sender.go
+go clean
+popd >/dev/null
 popd >/dev/null 
