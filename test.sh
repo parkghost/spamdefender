@@ -2,17 +2,12 @@
 set -e
 # a helper script to run tests in the appropriate directories
 
-for dir in html analyzer/goseg ; do
+for dir in html analyzer/goseg mailfile ; do
     echo "testing $dir"
     pushd $dir >/dev/null
     go test -test.v -timeout 15s
     popd >/dev/null
 done
-
-echo "testing mailfile"
-pushd mailfile >/dev/null
-go test -v -test.run=".*POP3|.*RFC2047"
-popd >/dev/null 
 
 # no tests, but a build is something
 echo "build github.com/parkghost/spamdefender"

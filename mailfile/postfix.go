@@ -1,16 +1,10 @@
 package mailfile
 
 import (
-	"bytes"
 	"github.com/parkghost/pkg/net/mail"
 	"io"
-	"os/exec"
+	"os"
 	"path"
-)
-
-var (
-	CmdPostcatPath = "/usr/sbin/postcat"
-	CmdParameter   = []string{"-hb"} //print header and body only
 )
 
 type PostfixMail struct {
@@ -47,19 +41,14 @@ func (m *PostfixMail) To() []*mail.Address {
 }
 
 func (m *PostfixMail) Parse() (err error) {
-	cmd := &exec.Cmd{}
-	cmdBuf := &bytes.Buffer{}
-
-	cmd = exec.Command(CmdPostcatPath, append(CmdParameter, m.filePath)...)
-	cmd.Stderr = cmdBuf
-	cmd.Stdout = cmdBuf
-
-	err = cmd.Run()
+	f, err := os.Open(m.filePath)
 	if err != nil {
-		return
+		return err
 	}
+	defer f.Close()
 
-	message, err := mail.ReadMessage(cmdBuf)
+	var message *mail.Message
+	message, err = mail.ReadMessage(NewRecordReader(f))
 	if err != nil {
 		return
 	}

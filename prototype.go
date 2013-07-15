@@ -29,7 +29,7 @@ var (
 	localDomain     = "javaworld.com.tw"
 	cacheSize       = 100
 
-	defaultMailFileFactory = &mailfile.POP3MailFileFactory{}
+	defaultMailFileFactory = &mailfile.PostfixMailFileFactory{}
 	numOfProcessor         = 100
 	folderScanInterval     = time.Duration(1) * time.Second
 
@@ -56,7 +56,7 @@ func main() {
 }
 
 func initDefaultLogger() {
-	sdl, err := os.OpenFile(spamdefenderLog, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	sdl, err := os.OpenFile(spamdefenderLog, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0644)
 	if err != nil {
 		log.Fatal(err)
 	}
