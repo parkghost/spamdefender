@@ -1,0 +1,145 @@
+JWorld@TW新話題通知:又官階面帳密登入問題
+"JavaWorld@TW" <webmaster@mail.javaworld.com.tw>
+parkghost@hotmail.com
+<HTML>
+<HEAD>
+<meta HTTP-EQUIV=Content-Type content="text/html;charset=UTF-8">
+<base href="http://www.javaworld.com.tw/jute/">
+<TITLE>JWorld@TW</TITLE>
+<STYLE TYPE='text/css'>
+  BODY      { font-family: Tahoma,Georgia; color: #000000; font-size: 12px }
+  P         { font-family: Tahoma,Georgia; color: #000000; font-size: 12px } 
+  TD        { font-family: Tahoma,Georgia; color: #000000; font-size: 12px ;table-layout:fixed; word-break :break-all}  
+  TEXTAREA  { font-family: Tahoma,Georgia; font-size: 12px }
+  A         { text-decoration: underline }
+  A:link    { color: #000000; text-decoration: underline }
+  A:visited { color: #000080; text-decoration: underline }
+  A:active  { color: #FF0000; text-decoration: underline }
+  A:hover   { color: #FF0000; text-decoration: underline }
+  .nav         { text-decoration: underline; color:#000000 }
+  .nav:link    { text-decoration: underline; color:#000000 }
+  .nav:visited { text-decoration: underline; color:#000000 }
+  .nav:active  { text-decoration: underline; color:#FF0000 }
+  .nav:hover   { text-decoration: none; color:#FF0000 }
+  .topic         { text-decoration: none }
+  .topic:link    { text-decoration: none; color:#000000 }
+  .topic:visited { text-decoration: none; color:#000080 }
+  .topic:active  { text-decoration: none; color:#FF0000 }
+  .topic:hover   { text-decoration: underline; color:#FF0000 }
+  .ilink         { text-decoration: underline; color:#0000FF }
+  .ilink:link    { text-decoration: underline; color:#0000FF }
+  .ilink:visited { text-decoration: underline; color:#004080 }
+  .ilink:active  { text-decoration: underline; color:#FF0000 }
+  .ilink:hover   { text-decoration: underline; color:#FF0000 }          
+</STYLE>
+</HEAD>
+<BODY BGCOLOR='#FFFFFF' TEXT='#000000' LINK='#000000' VLINK='#000080' ALINK='#FF0000'>
+Hi,parkghost <br><br>
+您訂閱的版面:Java SE 討論區有新話題了!
+<br>
+<b>jarekhuang</b>在<a href="http://www.javaworld.com.tw/jute" target=_blank>JWorld@TW</a>裡發了新話題：<br>
+<br>
+---------- <br>
+Subject: <b>又官階面帳密登入問題</b><br>
+Date:       2013-02-19 06:53<br><br>
+各位好~有個問題想請為各位大大!!<BR>就是小弟設計了一個登入介面, 在登入錯誤時會在password下面空白處產生"錯誤訊息字串"  (如下圖), 之後會清除accountfiled 和passwordfiled, 但是問題在當我再次輸入錯誤時, "錯誤訊息字串" 就不會顯示出來了, 但是小弟去跑debug時, 在當輸入錯誤第二次時, 確實會去跑要顯示錯誤訊息的程式碼( 也就是void showInvalidFrame() ), 但是 並不會在次顯示出來. 請問各位是否可以給予小弟一點指點, 謝謝<BR><BR>小弟想說用while迴圈在if外面, 但發現程式會當掉,  小弟測試後他會一直跑while迴圈, 但是當跑到void showInvalidFrame() 也不會顯示出錯誤訊息? 這會是甚麼原因呢?<BR><BR><table border="0" cellspacing="1" cellpadding="3" class="java" bgcolor="#999999"><tr><td width="1" align="left"  bgcolor="#dddddd" valign="top"><pre><font color="#555555">1<br>2<br>3<br>4<br>5<br>6<br>7<br>8<br>9<br>
+ 10<br>11<br>12<br>13<br>14<br>15<br>16<br>17<br>18<br>19<br>20<br>21<br>22<br>23<br>24<br>25<br>26<br>27<br>28<br>29<br>30<br>31<br>32<br>33<br>34<br>35<br>36<br>37<br>38<br>39<br>40<br>41<br>42<br>43<br>44<br>45<br>46<br>47<br>48<br>49<br>50<br>51<br>52<br>53<br>54<br>55<br>56<br>57<br>58<br>59<br>60<br>61<br>62<br>63<br>64<br>65<br>66<br>67<br>68<br>69<br>70<br>71<br>72<br>73<br>74<br>75<br>76<br>77<br>78<br>79<br>80<br>81<br>82<br>83<br>84<br>85<br>86<br></font></pre></td><td align="left" bgcolor="#ffffff" valign="top"><pre>
+           <font class="java-reserved_word"><b>private</b></font> JLabel invalidMessage = <font class="java-reserved_word"><b>new</b></font> JLabel(<font class="java-string">"Invalid user ID or password. Re-enter valid ID and password"</font>, SwingConstants.CENTER);
+&nbsp;&nbsp;
+.
+.
+.
+            <font class="java-reserved_word"><b>private</b></font>  String username=<font class="java-string">"Morris"</font>;
+&nbsp;&nbsp;<font class="java-reserved_word"><b>private</b></font>  String password=<font class="java-string">"111"</font>;
+.
+.
+.
+.
+&nbsp;
+southLoginPanel = <font class="java-reserved_word"><b>new</b></font> JPanel(<font class="java-reserved_word"><b>new</b></font> GridLayout(3,3));
+&nbsp;&nbsp;&nbsp;&nbsp;JLabel blank = <font class="java-reserved_word"><b>new</b></font> JLabel(<font class="java-string">" "</font>);
+&nbsp;&nbsp;&nbsp;&nbsp;southLoginPanel.add(blank);
+&nbsp;&nbsp;&nbsp;&nbsp;southLoginPanel.add(blank);
+&nbsp;&nbsp;&nbsp;&nbsp;southLoginPanel.add(blank);
+&nbsp;&nbsp;&nbsp;&nbsp;southLoginPanel.add(blank);
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;accountPassword = <font class="java-reserved_word"><b>new</b></font> JPanel(<font class="java-reserved_word"><b>new</b></font> GridLayout(2,2));
+&nbsp;&nbsp;&nbsp;&nbsp;accountPassword.add(accountName);
+&nbsp;&nbsp;&nbsp;&nbsp;accountPassword.add(accountField);
+&nbsp;&nbsp;&nbsp;&nbsp;accountPassword.add(passwordLabel);
+&nbsp;&nbsp;&nbsp;&nbsp;accountPassword.add(passwordField);
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;southLoginPanel.add(accountPassword);
+.
+.
+.
+.
+.
+.
+&nbsp;
+<font class="java-reserved_word"><b>public</b></font> <font class="java-reserved_word"><b>void</b></font> actionPerformed(ActionEvent arg0)
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font class="java-bracket">{</font>&nbsp;&nbsp;
+&nbsp;&nbsp;
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font class="java-comment">//Checks if user is a legitime employee from the database</font>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String accountField2=accountField.getText();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;String passwordField2=passwordField.getText();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                              <font class="java-comment">//while(true)</font>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font class="java-reserved_word"><b>if</b></font>(username.equals(accountField2)& password.equals(passwordField2))
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font class="java-bracket">{</font>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;MainWindow managerMainWindow = <font class="java-reserved_word"><b>new</b></font> MainWindow();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font class="java-comment">// Generate the main window once account information is verified.</font>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;managerMainWindow.northInformation.add(managerMainWindow.dateTimeLabel);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;managerMainWindow.mainWindow.add(managerMainWindow.northInformation, BorderLayout.NORTH);
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;managerMainWindow.dispose();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font class="java-bracket">}</font><font class="java-reserved_word"><b>else</b></font> <font class="java-comment">// failed login </font>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font class="java-bracket">{</font>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showInvalidFrame();
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font class="java-bracket">}</font>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font class="java-bracket">}</font>
+.
+.
+.
+.
+.
+.
+.
+&nbsp;
+             <font class="java-reserved_word"><b>public</b></font> <font class="java-reserved_word"><b>void</b></font> showInvalidFrame()<font class="java-bracket">{</font>
+&nbsp;&nbsp;&nbsp;&nbsp;invalidMessage.setForeground(Color.red);
+&nbsp;&nbsp;&nbsp;&nbsp;this.southLoginPanel.add(invalidMessage);
+&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;LoginWindow incorrectWindow = <font class="java-reserved_word"><b>new</b></font> LoginWindow();
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;<font class="java-comment">//incorrectWindow.accountField.setText("");</font>
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;this.accountField.setText(<font class="java-string">""</font>);
+&nbsp;&nbsp;&nbsp;&nbsp;this.passwordField.setText(<font class="java-string">""</font>);
+&nbsp;&nbsp;&nbsp;&nbsp;accountField.requestFocus(); 
+&nbsp;&nbsp;&nbsp;&nbsp;
+&nbsp;&nbsp;<font class="java-bracket">}</font>
+</pre></td></tr></table> <br>
+			<br>
+																						<a href="upload/2013/02/19/12270610.png" target=_blank><img src="upload/2013/02/19/12270610.png" width=640 height=167 title="Click to view full 123.png (1366 X 357)" border=0 align=absmiddle></a>
+															<br>
+---------- <br>
+<br>
+請勿直接回覆此EMAIL,此為系統系統信件, 請到論壇回覆。 <br>
+
+點選以下LINK可以直接連到此話題：<a href="http://www.javaworld.com.tw/jute/post/view?bid=5&id=312139" target=_blank>http://www.javaworld.com.tw/jute/post/view?bid=5&id=312139</a> <br>
+
+----------<br>
+JWorld@TW http://www.javaworld.com.tw/jute
+</BODY>
+</HTML>

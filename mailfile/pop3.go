@@ -53,22 +53,22 @@ func (m *POP3Mail) Parse() (err error) {
 		return
 	}
 
-	m.subject, err = parseSubject(message)
+	m.subject, err = ParseSubject(message)
 	if err != nil {
 		return
 	}
 
-	m.from, err = parseFromAddress(message)
+	m.from, err = ParseFromAddress(message)
 	if err != nil {
 		return
 	}
 
-	m.to, err = parseToAddress(message)
+	m.to, err = ParseToAddress(message)
 	if err != nil {
 		return
 	}
 
-	m.content, err = parseBoby(message)
+	m.content, err = ParseBoby(message)
 	if err != nil {
 		return
 	}

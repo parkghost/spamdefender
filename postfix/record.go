@@ -1,4 +1,4 @@
-package mailfile
+package postfix
 
 import (
 	"bufio"

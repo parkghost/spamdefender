@@ -1,7 +1,8 @@
-package mailfile
+package postfix
 
 import (
 	"github.com/parkghost/pkg/net/mail"
+	"github.com/parkghost/spamdefender/mailfile"
 	"io"
 	"os"
 	"path"
@@ -53,22 +54,22 @@ func (m *PostfixMail) Parse() (err error) {
 		return
 	}
 
-	m.subject, err = parseSubject(message)
+	m.subject, err = mailfile.ParseSubject(message)
 	if err != nil {
 		return
 	}
 
-	m.from, err = parseFromAddress(message)
+	m.from, err = mailfile.ParseFromAddress(message)
 	if err != nil {
 		return
 	}
 
-	m.to, err = parseToAddress(message)
+	m.to, err = mailfile.ParseToAddress(message)
 	if err != nil {
 		return
 	}
 
-	m.content, err = parseBoby(message)
+	m.content, err = mailfile.ParseBoby(message)
 	if err != nil {
 		return
 	}
@@ -84,6 +85,12 @@ func (m *PostfixMail) String() string {
 	return m.filePath
 }
 
-func NewPostfixMail(filePath string) Mail {
+func NewPostfixMail(filePath string) mailfile.Mail {
 	return &PostfixMail{filePath: filePath}
+}
+
+type PostfixMailFileFactory struct{}
+
+func (p *PostfixMailFileFactory) Create(filePath string) mailfile.Mail {
+	return NewPostfixMail(filePath)
 }

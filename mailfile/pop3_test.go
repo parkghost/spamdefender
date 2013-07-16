@@ -1,42 +1,13 @@
 package mailfile
 
 import (
-	"bufio"
-	"bytes"
 	"io"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 )
-
-type plainSourceReader struct {
-	reader *bufio.Reader
-}
-
-func (p *plainSourceReader) ReadLine() (string, error) {
-	line, err := p.reader.ReadString('\n')
-	if err != nil {
-		return "", err
-	}
-
-	return strings.Trim(line, "\t\r\n"), nil
-}
-
-func (p *plainSourceReader) ReadRestString() (string, error) {
-
-	var buf bytes.Buffer
-	_, err := p.reader.WriteTo(&buf)
-	if err != nil {
-		return "", err
-	}
-
-	return strings.Trim(buf.String(), "\t\r\n"), nil
-}
-
-func NewPlainSourceReader(reader io.Reader) *plainSourceReader {
-	return &plainSourceReader{bufio.NewReader(reader)}
-}
 
 type Testdata struct {
 	source      string
@@ -45,64 +16,97 @@ type Testdata struct {
 
 var pop3Testdata = Testdata{
 	"testdata" + string(os.PathSeparator) + "pop3",
-	"testdata" + string(os.PathSeparator) + "pop3_plain",
+	"testdata" + string(os.PathSeparator) + "pop3_plaintext",
 }
 
 func TestPOP3RetrieveSubject(t *testing.T) {
-	mail := NewPOP3Mail(pop3Testdata.source)
-	f, err := os.Open(pop3Testdata.plainSource)
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer f.Close()
-
-	if err = mail.Parse(); err != nil {
-		t.Fatal(err)
-	}
-	defer mail.Close()
-
-	reader := NewPlainSourceReader(f)
-	subject, err := reader.ReadLine()
-	if err != nil {
+	pop3mail := NewPOP3Mail(pop3Testdata.source)
+	defer pop3mail.Close()
+	if err := pop3mail.Parse(); err != nil {
 		t.Fatal(err)
 	}
 
-	if subject != mail.Subject() {
-		t.Fatalf("expected mail subject is %s, got %s", subject, mail.Subject())
+	plainTextMail := NewPlainTextMail(pop3Testdata.plainSource)
+	defer plainTextMail.Close()
+	if err := plainTextMail.Parse(); err != nil {
+		t.Fatal(err)
+	}
+
+	if plainTextMail.Subject() != pop3mail.Subject() {
+		t.Fatalf("expected %s, got %s", plainTextMail.Subject(), pop3mail.Subject())
 	}
 }
 
 func TestPOP3RetrieveContent(t *testing.T) {
-	mail := NewPOP3Mail(pop3Testdata.source)
-	f, err := os.Open(pop3Testdata.plainSource)
+	pop3mail := NewPOP3Mail(pop3Testdata.source)
+	defer pop3mail.Close()
+	if err := pop3mail.Parse(); err != nil {
+		t.Fatal(err)
+	}
+
+	plainTextMail := NewPlainTextMail(pop3Testdata.plainSource)
+	defer plainTextMail.Close()
+	if err := plainTextMail.Parse(); err != nil {
+		t.Fatal(err)
+	}
+
+	actual, err := readContentString(pop3mail.Content())
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer f.Close()
+	actual = strings.TrimSpace(actual)
 
-	if err = mail.Parse(); err != nil {
-		t.Fatal(err)
-	}
-	defer mail.Close()
-
-	reader := NewPlainSourceReader(f)
-	_, err = reader.ReadLine()
+	expected, err := readContentString(plainTextMail.Content())
 	if err != nil {
 		t.Fatal(err)
 	}
+	expected = strings.TrimSpace(expected)
 
-	exptectedBodyContent, err := reader.ReadRestString()
+	if expected != actual {
+		t.Fatalf("expected \n%v\n, got %v", expected, actual)
+	}
+}
+
+func readContentString(reader io.Reader) (string, error) {
+	bytes, err := ioutil.ReadAll(reader)
 	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
+func TestPOP3RetrieveFrom(t *testing.T) {
+	pop3mail := NewPOP3Mail(pop3Testdata.source)
+	defer pop3mail.Close()
+	if err := pop3mail.Parse(); err != nil {
 		t.Fatal(err)
 	}
 
-	bodyBytes, err := ioutil.ReadAll(mail.Content())
-	if err != nil {
+	plainTextMail := NewPlainTextMail(pop3Testdata.plainSource)
+	defer plainTextMail.Close()
+	if err := plainTextMail.Parse(); err != nil {
 		t.Fatal(err)
 	}
-	gotBodyConent := strings.Trim(string(bodyBytes), "\t\r\n")
 
-	if exptectedBodyContent != gotBodyConent {
-		t.Fatalf("expected mail content is \n%v\n, got %v", exptectedBodyContent, gotBodyConent)
+	if !reflect.DeepEqual(plainTextMail.From(), pop3mail.From()) {
+		t.Fatalf("expected \n%v\n, got %v", plainTextMail.From(), pop3mail.From())
+	}
+}
+
+func TestPOP3RetrieveTo(t *testing.T) {
+	pop3mail := NewPOP3Mail(pop3Testdata.source)
+	defer pop3mail.Close()
+	if err := pop3mail.Parse(); err != nil {
+		t.Fatal(err)
+	}
+
+	plainTextMail := NewPlainTextMail(pop3Testdata.plainSource)
+	defer plainTextMail.Close()
+	if err := plainTextMail.Parse(); err != nil {
+		t.Fatal(err)
+	}
+
+	if !reflect.DeepEqual(plainTextMail.To(), pop3mail.To()) {
+		t.Fatalf("expected \n%v\n, got %v", plainTextMail.From(), pop3mail.From())
 	}
 }

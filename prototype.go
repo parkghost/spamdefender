@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/parkghost/spamdefender/mailfile"
+	"github.com/parkghost/spamdefender/postfix"
 	"github.com/parkghost/spamdefender/service"
 	"github.com/parkghost/spamdefender/service/filter"
 	metrics "github.com/rcrowley/go-metrics"
@@ -15,8 +15,8 @@ import (
 const ps = string(os.PathSeparator)
 
 var (
-	//queuesFolder = "/var/spool/postfix/"
-	queuesFolder     = "fakeQueues" + ps
+	queuesFolder = "/var/spool/postfix/"
+	//queuesFolder     = "fakeQueues" + ps
 	holdFolder       = queuesFolder + "hold"
 	quarantineFolder = queuesFolder + "quarantine"
 	incomingFolder   = queuesFolder + "incoming"
@@ -29,12 +29,12 @@ var (
 	localDomain     = "javaworld.com.tw"
 	cacheSize       = 100
 
-	defaultMailFileFactory = &mailfile.PostfixMailFileFactory{}
+	defaultMailFileFactory = &postfix.PostfixMailFileFactory{}
 	numOfProcessor         = 100
 	folderScanInterval     = time.Duration(1) * time.Second
 
 	logsFolder             = "logs"
-	metricLog              = logsFolder + ps + "metric.log"
+	metricLog              = logsFolder + ps + "metrics.log"
 	writeMetricLogInterval = time.Duration(10) * time.Second
 	spamdefenderLog        = logsFolder + ps + "spamdefender.log"
 )

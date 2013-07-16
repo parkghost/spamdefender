@@ -2,7 +2,7 @@
 set -e
 # a helper script to run tests in the appropriate directories
 
-for dir in html analyzer/goseg mailfile ; do
+for dir in html analyzer/goseg mailfile postfix ; do
     echo "testing $dir"
     pushd $dir >/dev/null
     go test -test.v -timeout 15s
