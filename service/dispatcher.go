@@ -13,12 +13,12 @@ type Waiter interface {
 	Wait()
 }
 
-type Handler interface {
+type FileHandler interface {
 	Handle(string)
 }
 
 type PooledDispatcher struct {
-	handler   Handler
+	handler   FileHandler
 	wg        *sync.WaitGroup
 	semaphore chan bool
 	meter     metrics.Meter
@@ -45,7 +45,7 @@ func (d *PooledDispatcher) Wait() {
 	d.wg.Wait()
 }
 
-func NewPooledDispatcher(handler Handler, size int) Dispatcher {
+func NewPooledDispatcher(handler FileHandler, size int) Dispatcher {
 	meter := metrics.NewMeter()
 	timer := metrics.NewTimer()
 	active := metrics.NewGauge()
