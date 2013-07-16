@@ -2,6 +2,7 @@ package service
 
 import (
 	metrics "github.com/rcrowley/go-metrics"
+	"log"
 	"sync"
 )
 
@@ -19,6 +20,7 @@ type FileHandler interface {
 
 type PooledDispatcher struct {
 	handler   FileHandler
+	flusher   Flusher
 	wg        *sync.WaitGroup
 	semaphore chan bool
 	meter     metrics.Meter
@@ -43,14 +45,20 @@ func (d *PooledDispatcher) Dispatch(filePath string) {
 
 func (d *PooledDispatcher) Wait() {
 	d.wg.Wait()
+	if d.flusher != nil {
+		err := d.flusher.Flush()
+		if err != nil {
+			log.Printf("PooledDispatcher: flusher Err:%v", err)
+		}
+	}
 }
 
-func NewPooledDispatcher(handler FileHandler, size int) Dispatcher {
+func NewPooledDispatcher(handler FileHandler, flusher Flusher, size int) Dispatcher {
 	meter := metrics.NewMeter()
 	timer := metrics.NewTimer()
 	active := metrics.NewGauge()
 	metrics.Register("PooledDispatcher-ProcessTime", timer)
 	metrics.Register("PooledDispatcher-Mail", meter)
 	metrics.Register("PooledDispatcher-Active", active)
-	return &PooledDispatcher{handler, &sync.WaitGroup{}, make(chan bool, size), meter, timer, active}
+	return &PooledDispatcher{handler, flusher, &sync.WaitGroup{}, make(chan bool, size), meter, timer, active}
 }

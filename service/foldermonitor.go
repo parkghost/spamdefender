@@ -36,6 +36,10 @@ loop:
 				log.Println("FileMonitor: ", err)
 			}
 
+			if len(fis) == 0 {
+				continue
+			}
+
 			for _, fi := range fis {
 				log.Println("Found Mail:", m.folder+ps+fi.Name())
 				m.dispatcher.Dispatch(m.folder + ps + fi.Name())

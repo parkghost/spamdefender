@@ -33,6 +33,9 @@ var (
 	numOfProcessor         = 100
 	folderScanInterval     = time.Duration(1) * time.Second
 
+	qmgrService  = "/var/spool/postfix/public/qmgr"
+	flushTimeout = time.Duration(5) * time.Second
+
 	logsFolder             = "logs"
 	metricLog              = logsFolder + ps + "metrics.log"
 	writeMetricLogInterval = time.Duration(10) * time.Second
@@ -82,7 +85,8 @@ func startService() {
 
 	handlerAdapter := filter.NewFileHandlerAdapter(deliverFilter, defaultMailFileFactory)
 
-	dispatcher := service.NewPooledDispatcher(handlerAdapter, numOfProcessor)
+	flusher := service.NewPostfixFlusher(qmgrService, flushTimeout)
+	dispatcher := service.NewPooledDispatcher(handlerAdapter, flusher, numOfProcessor)
 	monitor := service.NewFolderMonitor(holdFolder, folderScanInterval, dispatcher)
 
 	startMetric()
