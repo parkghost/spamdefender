@@ -9,11 +9,12 @@ import (
 	"strings"
 )
 
-// postfix/src/global/rec_type.h
 const (
 	space = 0x20
 )
 
+// postfix-2.10.1/src/global/rec_type.h
+// postfix-2.10.1/src/global/record.c
 const (
 	VmailerExtraOffs = iota
 	Postfix10DataOffset
@@ -54,77 +55,28 @@ func (r *RecordReader) parse() (err error) {
 	r.parsed = true
 	n, pos := 0, 0
 
-	// skip rec_type
-	types, err := r.reader.ReadBytes(space)
+	// parse first record group (envelope information)
+	contentSizes, n, err := parseFirstRecord(r.reader)
 	if err != nil {
 		return
 	}
-	pos += len(types)
-
-	// The record at the start of the queue file specifies the message content size
-	// Vmailer extra offs - data offs
-	// Postfix 1.0 data offset
-	// Postfix 1.0 recipient count
-	// Postfix 2.1 qmgr flags
-	// Postfix 2.4 content length
-	contentSizes := [5]int{}
-
-	// read envelope message content sizes
-	for i := 0; i < len(contentSizes); i++ {
-		// REC_TYPE_SIZE_FORMAT	"%15ld %15ld %15ld %15ld %15ld"
-		var span []byte
-		if i == 0 {
-			span, n, err = read(r.reader, 15-1) // reader.ReadBytes already read one character(space)
-		} else {
-			span, n, err = read(r.reader, 16)
-		}
-		pos += n
-		if err != nil {
-			return
-		}
-
-		contentSizes[i], err = strconv.Atoi(strings.TrimSpace(string(span)))
-		if err != nil {
-			return
-		}
-	}
-
-	// skip top envelope information
-	n, err = skip(r.reader, contentSizes[Postfix10DataOffset]-pos)
 	pos += n
+
+	// ignore rest records
+	n, err = skip(r.reader, contentSizes[Postfix10DataOffset]-pos)
 	if err != nil {
 		return
 	}
+	pos += n
 
-	// read mail content
+	// parse second record group (mail content)
 	for {
-		// parse data meta
-		var meta []byte
-		meta, err = r.reader.Peek(5)
-		if err != nil {
-			return
-		}
-
-		var dataLength int
-		dataLength, n, err = parseBase128Int(meta, 1)
-		if err != nil {
-			return
-		}
-
-		// skip meta
-		n, err = skip(r.reader, n)
-		pos += n
-		if err != nil {
-			return
-		}
-
-		// read data and write data to buffer
 		var data []byte
-		data, n, err = read(r.reader, dataLength)
-		pos += n
+		data, n, err = readRawRecord(r.reader)
 		if err != nil {
 			return
 		}
+		pos += n
 
 		_, err = r.buf.Write(data)
 		if err != nil {
@@ -136,26 +88,55 @@ func (r *RecordReader) parse() (err error) {
 			return
 		}
 
-		// skip bottom envelope information
 		if pos > contentSizes[Postfix10DataOffset]+contentSizes[Postfix24ContentLength] {
 			break
 		}
 	}
 
+	// ignore third record group
+
 	return
 }
 
-func skip(reader *bufio.Reader, size int) (int, error) {
-	var i int
-	for i < size {
-		_, err := reader.ReadByte()
-		if err != nil {
-			return i, err
+func parseFirstRecord(reader *bufio.Reader) (contentSizes []int, length int, err error) {
+	contentSizes = make([]int, 5)
+
+	// skip REC_TYPE_SIZE
+	recTypes, err := reader.ReadBytes(space)
+	if err != nil {
+		return
+	}
+	length += len(recTypes)
+
+	// The record at the start of the queue file specifies the message content size
+	// Vmailer extra offs - data offs
+	// Postfix 1.0 data offset
+	// Postfix 1.0 recipient count
+	// Postfix 2.1 qmgr flags
+	// Postfix 2.4 content length
+
+	// read envelope message content sizes
+	for i := 0; i < len(contentSizes); i++ {
+		// REC_TYPE_SIZE_FORMAT	"%15ld %15ld %15ld %15ld %15ld"
+		var span []byte
+		n := 0
+		if i == 0 {
+			span, n, err = read(reader, 15-1) // reader.ReadBytes already read one character(space)
+		} else {
+			span, n, err = read(reader, 16)
 		}
-		i++
+		length += n
+		if err != nil {
+			return
+		}
+
+		contentSizes[i], err = strconv.Atoi(strings.TrimSpace(string(span)))
+		if err != nil {
+			return
+		}
 	}
 
-	return i, nil
+	return
 }
 
 func read(reader *bufio.Reader, size int) (buf []byte, length int, err error) {
@@ -172,6 +153,47 @@ func read(reader *bufio.Reader, size int) (buf []byte, length int, err error) {
 			break
 		}
 	}
+	return
+}
+
+func skip(reader *bufio.Reader, size int) (int, error) {
+	var i int
+	for i < size {
+		_, err := reader.ReadByte()
+		if err != nil {
+			return i, err
+		}
+		i++
+	}
+
+	return i, nil
+}
+
+func readRawRecord(reader *bufio.Reader) (data []byte, length int, err error) {
+	// parse rec_type and data length
+	meta, err := reader.Peek(5)
+	if err != nil {
+		return
+	}
+
+	dataLength, offset, err := parseBase128Int(meta, 1)
+	if err != nil {
+		return
+	}
+
+	// read data
+	n, err := skip(reader, offset)
+	if err != nil {
+		return
+	}
+	length += n
+
+	data, n, err = read(reader, dataLength)
+	if err != nil {
+		return
+	}
+	length += n
+
 	return
 }
 
