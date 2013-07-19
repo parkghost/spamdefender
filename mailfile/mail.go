@@ -1,10 +1,8 @@
 package mailfile
 
 import (
-	iconv "github.com/djimenez/iconv-go"
 	"github.com/parkghost/pkg/net/mail"
 	"io"
-	"strings"
 )
 
 type Mail interface {
@@ -31,20 +29,8 @@ func ParseToAddress(message *mail.Message) ([]*mail.Address, error) {
 }
 
 func ParseBoby(message *mail.Message) (reader io.Reader, err error) {
-	//Content-Type: text/html;charset=UTF-8
-	contentType := message.Header.Get("Content-Type")
-	charset := contentType[strings.LastIndex(contentType, "=")+1:]
-
-	reader = message.Body
-
-	if strings.ToLower(charset) != "utf-8" {
-		reader, err = iconv.NewReader(message.Body, charset, "UTF-8")
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return
+	// THINK: handle variant Content-Type, Content-Transfer-Encoding, charset
+	return message.Body, nil
 }
 
 type MailFileFactory interface {
