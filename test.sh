@@ -21,13 +21,13 @@ go build training.go
 go build builddictionarydata.go
 go clean
 
-echo "build mailfetcher"
+echo "build tools/mailfetcher"
 pushd mailfetecher >/dev/null
 go build fetcher.go
 go clean
 popd >/dev/null
 
-echo "build mailclassifier"
+echo "build tools/mailclassifier"
 pushd mailclassifier >/dev/null
 go build classifier.go
 go build explain.go
@@ -36,7 +36,7 @@ go build training.go
 go clean
 popd >/dev/null
 
-echo "build mailsender"
+echo "build tools/mailsender"
 pushd mailsender >/dev/null
 go build sender.go
 go clean
