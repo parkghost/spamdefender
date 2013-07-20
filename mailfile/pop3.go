@@ -90,3 +90,9 @@ func (m *POP3Mail) String() string {
 func NewPOP3Mail(filePath string) Mail {
 	return &POP3Mail{filePath: filePath}
 }
+
+type POP3MailFileFactory struct{}
+
+func (p *POP3MailFileFactory) Create(filePath string) Mail {
+	return NewPOP3Mail(filePath)
+}

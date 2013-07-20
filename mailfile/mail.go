@@ -36,9 +36,3 @@ func ParseBoby(message *mail.Message) (reader io.Reader, err error) {
 type MailFileFactory interface {
 	Create(string) Mail
 }
-
-type POP3MailFileFactory struct{}
-
-func (p *POP3MailFileFactory) Create(filePath string) Mail {
-	return NewPOP3Mail(filePath)
-}
