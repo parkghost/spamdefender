@@ -30,7 +30,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	totalNum, goods, bads, neutrals := 0, 0, 0, 0
+	totalNum, goods, bads, neutrals, badformats := 0, 0, 0, 0, 0
 
 	fis, err := ioutil.ReadDir(mailbox)
 	if err != nil {
@@ -51,39 +51,41 @@ func main() {
 
 		htmlText := mail.Content()
 		content, err := htmlutil.ExtractText(htmlText, htmlutil.BannerRemover("----------", 0, 1))
-		if err != nil {
-			fmt.Println(err)
-		}
 		mail.Close()
-
-		class := anlz.Test(content)
 
 		color := ""
 		moveTo := ""
 
-		switch class {
-		case analyzer.Neutral:
-			neutrals += 1
-			color = "cyan+b"
-			moveTo = "neutral" + ps + fi.Name()
-		case analyzer.Good:
-			goods += 1
-			color = "green+b"
-			moveTo = "good" + ps + fi.Name()
-		case analyzer.Bad:
-			bads += 1
-			color = "red+b"
-			moveTo = "bad" + ps + fi.Name()
+		if err != nil {
+			badformats += 1
+			moveTo = "badformat" + ps + fi.Name()
+		} else {
+			class := anlz.Test(content)
+
+			switch class {
+			case analyzer.Neutral:
+				neutrals += 1
+				color = "cyan+b"
+				moveTo = "neutral" + ps + fi.Name()
+			case analyzer.Good:
+				goods += 1
+				color = "green+b"
+				moveTo = "good" + ps + fi.Name()
+			case analyzer.Bad:
+				bads += 1
+				color = "red+b"
+				moveTo = "bad" + ps + fi.Name()
+			}
 		}
 
 		if !dryRun {
 			common.CopyFile(filePath, moveTo)
 		}
 
-		msg := fmt.Sprintf("%s %s\n", mail.Subject(), filePath)
+		msg := fmt.Sprintf("%s %s\n", mail.Subject(), moveTo)
 		fmt.Printf(ansi.Color(msg, color))
 	}
-	fmt.Printf("TotalNum: %d, goods: %d, bads: %d, neutrals: %d\n", totalNum, goods, bads, neutrals)
+	fmt.Printf("TotalNum: %d, goods: %d, bads: %d, neutrals: %d, badformat:%d\n", totalNum, goods, bads, neutrals, badformats)
 }
 
 func checkErr(err error) {
