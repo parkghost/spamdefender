@@ -1,6 +1,8 @@
 language: go
 go:
   - 1.1.1
+before_install:
+  - git submodule update --init --recursive
 install: true
 script:
   - pushd $TRAVIS_BUILD_DIR

@@ -1,0 +1,18 @@
+[submodule "vender/src/github.com/parkghost/bayesian"]
+	path = vender/src/github.com/parkghost/bayesian
+	url = git://github.com/parkghost/bayesian.git
+[submodule "vender/src/github.com/parkghost/pkg"]
+	path = vender/src/github.com/parkghost/pkg
+	url = git://github.com/parkghost/pkg.git
+[submodule "vender/src/github.com/bytbox/go-pop3"]
+	path = vender/src/github.com/bytbox/go-pop3
+	url = git://github.com/bytbox/go-pop3.git
+[submodule "vender/src/github.com/mgutz/ansi"]
+	path = vender/src/github.com/mgutz/ansi
+	url = git://github.com/mgutz/ansi.git
+[submodule "vender/src/github.com/rcrowley/go-metrics"]
+	path = vender/src/github.com/rcrowley/go-metrics
+	url = git://github.com/rcrowley/go-metrics.git
+[submodule "vender/src/github.com/djimenez/iconv-go"]
+	path = vender/src/github.com/djimenez/iconv-go
+	url = git://github.com/djimenez/iconv-go.git
