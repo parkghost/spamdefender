@@ -87,7 +87,7 @@ func (m *POP3Mail) String() string {
 	return m.filePath
 }
 
-func NewPOP3Mail(filePath string) Mail {
+func NewPOP3Mail(filePath string) *POP3Mail {
 	return &POP3Mail{filePath: filePath}
 }
 

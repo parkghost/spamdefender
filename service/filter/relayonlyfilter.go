@@ -38,7 +38,7 @@ func (sof *RelayOnlyFilter) String() string {
 	return "RelayOnlyFilter"
 }
 
-func NewRelayOnlyFilter(next Filter, localDomain string) Filter {
+func NewRelayOnlyFilter(next Filter, localDomain string) *RelayOnlyFilter {
 	total := metrics.NewCounter()
 	numOfRelay := metrics.NewCounter()
 	metrics.Register("RelayOnlyFilter-Total", total)

@@ -38,7 +38,7 @@ func (spmf *SubjectPrefixMatchFilter) String() string {
 	return "SubjectPrefixMatchFilter"
 }
 
-func NewSubjectPrefixMatchFilter(next Filter, subjectPrefixes []string) Filter {
+func NewSubjectPrefixMatchFilter(next Filter, subjectPrefixes []string) *SubjectPrefixMatchFilter {
 	total := metrics.NewCounter()
 	matched := metrics.NewCounter()
 	metrics.Register("SubjectPrefixMatchFilter-Total", total)

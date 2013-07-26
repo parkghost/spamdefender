@@ -20,7 +20,7 @@ func (ddf *DefaultDestinationFilter) String() string {
 	return "DefaultDestinationFilter"
 }
 
-func NewDefaultDestinationFilter() Filter {
+func NewDefaultDestinationFilter() *DefaultDestinationFilter {
 	total := metrics.NewCounter()
 	metrics.Register("DefaultDestinationFilter-Total", total)
 	return &DefaultDestinationFilter{total}

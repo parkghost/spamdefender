@@ -2,7 +2,6 @@ package filter
 
 import (
 	"github.com/parkghost/spamdefender/mailfile"
-	"github.com/parkghost/spamdefender/service"
 	metrics "github.com/rcrowley/go-metrics"
 	"log"
 	"os"
@@ -34,7 +33,7 @@ func (fha *FileHandlerAdapter) Handle(filePath string) {
 	}
 }
 
-func NewFileHandlerAdapter(filter Filter, factory mailfile.MailFileFactory) service.FileHandler {
+func NewFileHandlerAdapter(filter Filter, factory mailfile.MailFileFactory) *FileHandlerAdapter {
 	total := metrics.NewCounter()
 	meter := metrics.NewMeter()
 	metrics.Register("FileHandlerAdapter-Total", total)

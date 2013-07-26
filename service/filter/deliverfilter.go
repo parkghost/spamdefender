@@ -41,7 +41,7 @@ func (df *DeliverFilter) String() string {
 	return "DeliverFilter"
 }
 
-func NewDeliverFilter(next Filter, paths map[Result]string) Filter {
+func NewDeliverFilter(next Filter, paths map[Result]string) *DeliverFilter {
 	total := metrics.NewCounter()
 	metrics.Register("DeliverFilter-Total", total)
 

@@ -91,9 +91,7 @@ func main() {
 				msg := fmt.Sprintf("%s, %s\n", mail.Subject(), mailFilePath)
 				fmt.Printf(ansi.Color(msg, color))
 				if explain {
-					if ba, ok := anlz.(*analyzer.BayesianAnalyzer); ok {
-						fmt.Println(ba.Explain(content))
-					}
+					fmt.Println(anlz.Explain(content))
 				}
 			}
 

@@ -18,6 +18,6 @@ func (pf *PostfixFlusher) Flush() error {
 	return postfix.MailTrigger(pf.qmgrService, postfix.QMGR_REQ_SCAN_INCOMING, pf.timeout)
 }
 
-func NewPostfixFlusher(service string, timeout time.Duration) Flusher {
+func NewPostfixFlusher(service string, timeout time.Duration) *PostfixFlusher {
 	return &PostfixFlusher{service, timeout}
 }

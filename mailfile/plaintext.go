@@ -91,6 +91,6 @@ func (m *plainTextMail) String() string {
 	return m.filePath
 }
 
-func NewPlainTextMail(filePath string) Mail {
+func NewPlainTextMail(filePath string) *plainTextMail {
 	return &plainTextMail{filePath: filePath}
 }

@@ -53,7 +53,7 @@ func (d *PooledDispatcher) Wait() {
 	}
 }
 
-func NewPooledDispatcher(handler FileHandler, flusher Flusher, size int) Dispatcher {
+func NewPooledDispatcher(handler FileHandler, flusher Flusher, size int) *PooledDispatcher {
 	meter := metrics.NewMeter()
 	timer := metrics.NewTimer()
 	active := metrics.NewGauge()

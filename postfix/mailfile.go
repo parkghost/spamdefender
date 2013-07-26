@@ -85,7 +85,7 @@ func (m *PostfixMail) String() string {
 	return m.filePath
 }
 
-func NewPostfixMail(filePath string) mailfile.Mail {
+func NewPostfixMail(filePath string) *PostfixMail {
 	return &PostfixMail{filePath: filePath}
 }
 

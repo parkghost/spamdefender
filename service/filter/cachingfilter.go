@@ -70,7 +70,7 @@ func (cf *CachingProxy) String() string {
 	return fmt.Sprintf("CachingProxy(%s)", cf.target)
 }
 
-func NewCachingProxy(target Filter, size int) Filter {
+func NewCachingProxy(target Filter, size int) *CachingProxy {
 	_, ok := target.(CacheKey)
 	if !ok {
 		log.Fatalf("%s should implement CacheKey interface\n", target)
