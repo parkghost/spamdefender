@@ -2,11 +2,11 @@ package main
 
 import (
 	"bufio"
-	"github.com/parkghost/spamdefender/analyzer/goseg"
-	"github.com/parkghost/spamdefender/html"
-	"github.com/parkghost/spamdefender/mailfile"
+	"goseg"
+	"htmlutil"
 	"io/ioutil"
 	"log"
+	"mailfile"
 	"os"
 	"sort"
 	"strconv"
@@ -58,7 +58,7 @@ func main() {
 			}
 
 			htmlText := mail.Content()
-			content, _ := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
+			content, _ := htmlutil.ExtractText(htmlText, htmlutil.BannerRemover("----------", 0, 1))
 			mail.Close()
 
 			words := tokenizer.Cut([]rune(content))

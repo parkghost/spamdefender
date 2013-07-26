@@ -1,8 +1,8 @@
 package main
 
 import (
+	"common"
 	"fmt"
-	"github.com/parkghost/spamdefender/common"
 	"io/ioutil"
 	"log"
 	"net/smtp"

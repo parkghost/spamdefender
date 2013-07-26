@@ -1,10 +1,10 @@
 package main
 
 import (
+	"common"
 	"fmt"
 	"github.com/parkghost/bayesian"
-	"github.com/parkghost/spamdefender/analyzer/goseg"
-	"github.com/parkghost/spamdefender/common"
+	"goseg"
 	"io/ioutil"
 	"log"
 	"os"

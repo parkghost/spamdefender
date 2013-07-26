@@ -2,10 +2,10 @@ package main
 
 import (
 	"bytes"
+	"common"
 	"fmt"
 	pop3 "github.com/bytbox/go-pop3"
 	"github.com/parkghost/pkg/net/mail"
-	"github.com/parkghost/spamdefender/common"
 	"io/ioutil"
 	"log"
 	"os"

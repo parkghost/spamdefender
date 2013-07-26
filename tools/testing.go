@@ -1,14 +1,14 @@
 package main
 
 import (
+	"analyzer"
+	"common"
 	"fmt"
 	"github.com/mgutz/ansi"
-	"github.com/parkghost/spamdefender/analyzer"
-	"github.com/parkghost/spamdefender/common"
-	"github.com/parkghost/spamdefender/html"
-	"github.com/parkghost/spamdefender/mailfile"
+	"htmlutil"
 	"io/ioutil"
 	"log"
+	"mailfile"
 	"os"
 	"time"
 )
@@ -62,7 +62,7 @@ func main() {
 			}
 
 			htmlText := mail.Content()
-			content, _ := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
+			content, _ := htmlutil.ExtractText(htmlText, htmlutil.BannerRemover("----------", 0, 1))
 			mail.Close()
 
 			class := anlz.Test(content)

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/parkghost/spamdefender/analyzer/goseg"
+	"goseg"
 	"log"
 	"os"
 )
@@ -9,7 +9,7 @@ import (
 const ps = string(os.PathSeparator)
 
 var (
-	dictFilePath     = ".." + ps + "data" + ps + "dict.txt"
+	dictFilePath     = ".." + ps + "conf" + ps + "dict.txt"
 	dictDataFilePath = ".." + ps + "data" + ps + "dict.data"
 )
 

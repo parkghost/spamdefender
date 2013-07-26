@@ -1,14 +1,14 @@
 package main
 
 import (
+	"common"
 	"fmt"
 	"github.com/parkghost/bayesian"
-	"github.com/parkghost/spamdefender/analyzer/goseg"
-	"github.com/parkghost/spamdefender/common"
-	"github.com/parkghost/spamdefender/html"
-	"github.com/parkghost/spamdefender/mailfile"
+	"goseg"
+	"htmlutil"
 	"io/ioutil"
 	"log"
+	"mailfile"
 	"os"
 	"time"
 )
@@ -66,7 +66,7 @@ func main() {
 			}
 
 			htmlText := mail.Content()
-			content, _ := html.ExtractText(htmlText, html.BannerRemover("----------", 0, 1))
+			content, _ := htmlutil.ExtractText(htmlText, htmlutil.BannerRemover("----------", 0, 1))
 			mail.Close()
 
 			words := common.Normalize(tokenizer.Cut([]rune(content)), cutset)

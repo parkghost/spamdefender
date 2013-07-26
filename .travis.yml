@@ -1,13 +1,6 @@
 language: go
 go:
   - 1.1.1
-install:
-  - go get code.google.com/p/go.net/html
-  - go get github.com/bytbox/go-pop3
-  - go get github.com/mgutz/ansi
-  - go get github.com/parkghost/bayesian
-  - go get github.com/parkghost/pkg/net/mail
-  - go get github.com/rcrowley/go-metrics
 script:
   - pushd $TRAVIS_BUILD_DIR
   - ./test.sh

@@ -1,18 +1,20 @@
 #!/bin/bash
-set -e
 # a helper script to run tests in the appropriate directories
 
-for dir in html analyzer/goseg mailfile postfix ; do
-    echo "testing $dir"
-    pushd $dir >/dev/null
-    go test -test.v -timeout 15s
-    popd >/dev/null
-done
+set -e
+source set_go_path.sh
+
+echo "testing pkg"
+pushd pkg >/dev/null
+go test -v "./..."
+popd >/dev/null
 
 # no tests, but a build is something
-echo "build github.com/parkghost/spamdefender"
+echo "build server"
+pushd server/src >/dev/null
 go build
 go clean
+popd >/dev/null
 
 echo "build tools"
 pushd tools >/dev/null
