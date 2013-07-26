@@ -42,7 +42,7 @@ func main() {
 	}
 
 	for _, item := range trainingData {
-		log.Printf("Traning %s data", item.class)
+		log.Printf("Traning %s", item.folder)
 		totalNum := 0
 		var totalSize int64
 
@@ -75,10 +75,13 @@ func main() {
 		}
 
 		elapsed := time.Now().Sub(startTime)
+
+		fmt.Printf("TotalNum: %d\n", totalNum)
 		fmt.Printf("Elapsed: %s, TPS(Mail): %f, TPS(FileSize): %s\n",
 			time.Now().Sub(startTime),
 			float64(totalNum)/(float64(elapsed)/float64(time.Second)),
 			common.HumanReadableSize(uint64(float64(totalSize)/(float64(elapsed)/float64(time.Second)))))
+
 	}
 
 	classifier.WriteToFile(output)
