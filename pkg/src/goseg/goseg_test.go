@@ -7,25 +7,10 @@ import (
 
 const ps = string(os.PathSeparator)
 
-func TestTrieAddChild(t *testing.T) {
+func TestTrieNodeLookup(t *testing.T) {
+	text := "ebdca"
 	root := &TrieNode{}
 
-	text := "ebdca"
-	for _, c := range []rune(text) {
-		root.addChild(c)
-	}
-
-	expected := "[a:[], b:[], c:[], d:[], e:[]]"
-	actual := root.String()
-	if expected != actual {
-		t.Fatalf("expected %s, got %s", expected, actual)
-	}
-}
-
-func TestTrieLookup(t *testing.T) {
-	root := &TrieNode{}
-
-	text := "ebdca"
 	for _, c := range []rune(text) {
 		root.addChild(c)
 	}
@@ -39,22 +24,17 @@ func TestTrieLookup(t *testing.T) {
 		}
 	}
 
-	if node := root.Lookup('g'); node != nil {
-		t.Fatalf("expected nil, but got %v", node)
-	}
 }
 
-func TestTrieAddString(t *testing.T) {
+func TestTrieNodeFind(t *testing.T) {
+	data := []string{"ab", "bc", "cd"}
 	root := &TrieNode{}
 
-	root.AddString("ab")
-	root.AddString("bc")
-	root.AddString("cd")
-
-	expected := "[a:[b:[]], b:[c:[]], c:[d:[]]]"
-	actual := root.String()
-	if expected != actual {
-		t.Fatalf("expected %s, got %s", expected, actual)
+	for _, w := range data {
+		root.AddString(w)
+		if !root.Find(w) {
+			t.Fatalf("%s not found", w)
+		}
 	}
 }
 

@@ -25,7 +25,7 @@ type tuple struct {
 type TrieNode struct {
 	Children []*TrieNode
 	Char     rune
-	Last     bool
+	WordEnd  bool
 }
 
 func (tn *TrieNode) String() string {
@@ -77,7 +77,7 @@ func (tn *TrieNode) AddString(word string) *TrieNode {
 			ptr = ptr.addChild(c)
 		}
 	}
-	ptr.Last = true
+	ptr.WordEnd = true
 	return ptr
 }
 
@@ -115,6 +115,18 @@ func (tn *TrieNode) addChild(char rune) *TrieNode {
 	}
 
 	return node
+}
+
+func (tn *TrieNode) Find(word string) bool {
+	ptr := tn
+	for _, c := range []rune(word) {
+		if node := ptr.Lookup(c); node != nil {
+			ptr = node
+		} else {
+			return false
+		}
+	}
+	return ptr.WordEnd == true
 }
 
 type Tokenizer struct {
@@ -175,7 +187,7 @@ func (tk *Tokenizer) cut_DAG(sentence []rune) []string {
 		c := sentence[j]
 		if p.Lookup(c) != nil {
 			p = p.Lookup(c)
-			if p.Last {
+			if p.WordEnd {
 				if DAG[i] == nil {
 					DAG[i] = make([]int, 0)
 				}
