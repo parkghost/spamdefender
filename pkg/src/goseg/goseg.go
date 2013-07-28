@@ -44,7 +44,7 @@ func (tn *TrieNode) String() string {
 	return buf.String()
 }
 
-func (tn *TrieNode) Lookup(Char rune) *TrieNode {
+func (tn *TrieNode) Lookup(char rune) *TrieNode {
 	n := len(tn.Children)
 	if n == 0 {
 		return nil
@@ -58,9 +58,9 @@ func (tn *TrieNode) Lookup(Char rune) *TrieNode {
 
 		m := (l + r) / 2
 		c := tn.Children[m].Char
-		if c == Char {
+		if c == char {
 			return tn.Children[m]
-		} else if c > Char {
+		} else if c > char {
 			r = m - 1
 		} else {
 			l = m + 1
@@ -81,11 +81,11 @@ func (tn *TrieNode) AddString(word string) *TrieNode {
 	return ptr
 }
 
-func (tn *TrieNode) addChild(Char rune) *TrieNode {
+func (tn *TrieNode) addChild(char rune) *TrieNode {
 
 	n := len(tn.Children)
 	if n == 0 {
-		node := &TrieNode{Children: make([]*TrieNode, 0), Char: Char}
+		node := &TrieNode{Children: make([]*TrieNode, 0), Char: char}
 		tn.Children = append(tn.Children, node)
 		return node
 	}
@@ -99,25 +99,21 @@ func (tn *TrieNode) addChild(Char rune) *TrieNode {
 
 		m := (l + r) / 2
 		c := tn.Children[m].Char
-		if c == Char {
+		if c == char {
 			return tn.Children[m]
-		} else if c > Char {
+		} else if c > char {
 			r = m - 1
 		} else {
 			l = m + 1
 		}
 	}
 
-	node := &TrieNode{Children: make([]*TrieNode, 0), Char: Char}
-	if l == n {
-		tn.Children = append(tn.Children, node)
-	} else {
-		newChildren := make([]*TrieNode, 0, n+1)
-		newChildren = append(newChildren, tn.Children[:l]...)
-		newChildren = append(newChildren, node)
-		newChildren = append(newChildren, tn.Children[l:]...)
-		tn.Children = newChildren
+	node := &TrieNode{Children: make([]*TrieNode, 0), Char: char}
+	tn.Children = append(tn.Children, node)
+	for i := len(tn.Children) - 1; i > l; i-- {
+		tn.Children[i-1], tn.Children[i] = tn.Children[i], tn.Children[i-1]
 	}
+
 	return node
 }
 
