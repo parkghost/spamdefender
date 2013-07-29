@@ -1,6 +1,7 @@
 package main
 
 import (
+	"analyzer"
 	"filter"
 	metrics "github.com/rcrowley/go-metrics"
 	"log"
@@ -9,17 +10,22 @@ import (
 	"postfix"
 	"runtime"
 	"time"
+	"updater"
 )
 
 var (
-	queuesFolder = "/var/spool/postfix/"
-	//queuesFolder     = "data" + ps + "fakeQueues" + ps
+	//queuesFolder = "/var/spool/postfix/"
+	queuesFolder     = "data" + ps + "fakeQueues" + ps
 	holdFolder       = queuesFolder + "hold"
 	quarantineFolder = queuesFolder + "quarantine"
 	incomingFolder   = queuesFolder + "incoming"
 
 	traningDataFilePath = "data" + ps + "bayesian.data"
 	dictDataFilePath    = "data" + ps + "dict.data"
+	updateDelay         = time.Duration(5) * time.Second
+
+	hamFolder  = "data" + ps + "received" + ps + "good"
+	spamFolder = "data" + ps + "received" + ps + "bad"
 
 	allPass         = false
 	subjectPrefixes = []string{"JWorld@TW新話題通知"}
@@ -43,7 +49,7 @@ func main() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
 	startTime := time.Now()
-	initDefaultLogger()
+	//initDefaultLogger()
 
 	log.Println("Starting daemon")
 	startService()
@@ -68,9 +74,20 @@ func initDefaultLogger() {
 }
 
 func startService() {
+	anlz, err := analyzer.NewBayesianAnalyzerWithUpdater(traningDataFilePath, dictDataFilePath, updateDelay)
+	if err != nil {
+		log.Fatal(err)
+	}
 
+	startMetric()
+	startFilterChain(anlz)
+	startUpdater(anlz)
+
+}
+
+func startFilterChain(anlz analyzer.Analyzer) {
 	defaultDestinationFilter := filter.NewDefaultDestinationFilter()
-	contentInspectionFilter := filter.NewContentInspectionFilter(defaultDestinationFilter, allPass, traningDataFilePath, dictDataFilePath)
+	contentInspectionFilter := filter.NewContentInspectionFilter(defaultDestinationFilter, allPass, anlz)
 	cachingProxy := filter.NewCachingProxy(contentInspectionFilter, cacheSize)
 	subjectPrefixMatchFilter := filter.NewSubjectPrefixMatchFilter(cachingProxy, subjectPrefixes)
 	relayOnlyFilter := filter.NewRelayOnlyFilter(subjectPrefixMatchFilter, localDomain)
@@ -83,15 +100,33 @@ func startService() {
 	handlerAdapter := filter.NewFileHandlerAdapter(deliverFilter, defaultMailFileFactory)
 
 	flusher := NewPostfixFlusher(qmgrService, flushTimeout)
-	dispatcher := NewPooledDispatcher(handlerAdapter, flusher, numOfProcessor)
+	dispatcher := NewPooledDispatcher("filter", handlerAdapter, flusher, numOfProcessor)
 	monitor := NewFolderMonitor(holdFolder, folderScanInterval, dispatcher)
 
-	startMetric()
 	monitor.Start()
 	AddShutdownHook(func() {
 		monitor.Stop()
 	})
+}
 
+func startUpdater(anlz analyzer.Analyzer) {
+	startContentInspectionUpdater(anlz, analyzer.Good, hamFolder)
+	startContentInspectionUpdater(anlz, analyzer.Bad, spamFolder)
+}
+
+func startContentInspectionUpdater(anlz analyzer.Analyzer, class string, folder string) {
+
+	contentInspectionUpdater := updater.NewContentInspectionUpdater(anlz, class)
+
+	handlerAdapter := updater.NewFileHandlerAdapter(contentInspectionUpdater, defaultMailFileFactory)
+
+	dispatcher := NewSingleDispatcher("updater-"+class, handlerAdapter)
+	monitor := NewFolderMonitor(folder, folderScanInterval, dispatcher)
+
+	monitor.Start()
+	AddShutdownHook(func() {
+		monitor.Stop()
+	})
 }
 
 func startMetric() {

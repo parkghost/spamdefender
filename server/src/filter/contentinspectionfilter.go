@@ -45,11 +45,7 @@ func (cif *ContentInspectionFilter) String() string {
 	return "ContentInspectionFilter"
 }
 
-func NewContentInspectionFilter(next Filter, allPass bool, traningDataFilePath string, dictDataFilePath string) *ContentInspectionFilter {
-	anlz, err := analyzer.NewBayesianAnalyzer(traningDataFilePath, dictDataFilePath)
-	if err != nil {
-		log.Fatal(err)
-	}
+func NewContentInspectionFilter(next Filter, allPass bool, anlz analyzer.Analyzer) *ContentInspectionFilter {
 	total := metrics.NewCounter()
 	metrics.Register("ContentInspectionFilter-Total", total)
 	counters := make(map[string]metrics.Counter)
