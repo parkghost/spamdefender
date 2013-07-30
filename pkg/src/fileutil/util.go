@@ -1,4 +1,4 @@
-package common
+package fileutil
 
 import (
 	"io"
@@ -24,8 +24,4 @@ func CopyFile(src, dst string) error {
 	}
 
 	return nil
-}
-
-func MoveFile(src, dst string) error {
-	return os.Rename(src, dst)
 }

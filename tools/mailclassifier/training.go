@@ -1,7 +1,7 @@
 package main
 
 import (
-	"common"
+	"analyzer"
 	"fmt"
 	"github.com/parkghost/bayesian"
 	"goseg"
@@ -50,7 +50,7 @@ func getWords(filePath string, tokenizer *goseg.Tokenizer) ([]string, error) {
 	}
 
 	words := tokenizer.Cut([]rune(string(bytes)))
-	return common.Normalize(words, cutset), nil
+	return analyzer.Normalize(words, cutset), nil
 }
 
 func checkErr(err error) {

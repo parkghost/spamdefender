@@ -1,7 +1,8 @@
 package main
 
 import (
-	"common"
+	"analyzer"
+	"fileutil"
 	"fmt"
 	"github.com/parkghost/bayesian"
 	"goseg"
@@ -69,7 +70,7 @@ func main() {
 				log.Fatalf("Err: %v, Mail:%s", err, mail.Path())
 			}
 
-			words := common.Normalize(tokenizer.Cut([]rune(post.Subject+" "+post.Content)), cutset)
+			words := analyzer.Normalize(tokenizer.Cut([]rune(post.Subject+" "+post.Content)), cutset)
 			classifier.Learn(words, item.class)
 			totalNum += 1
 		}
@@ -80,7 +81,7 @@ func main() {
 		fmt.Printf("Elapsed: %s, TPS(Mail): %f, TPS(FileSize): %s\n",
 			time.Now().Sub(startTime),
 			float64(totalNum)/(float64(elapsed)/float64(time.Second)),
-			common.HumanReadableSize(uint64(float64(totalSize)/(float64(elapsed)/float64(time.Second)))))
+			fileutil.Humanize(uint64(float64(totalSize)/(float64(elapsed)/float64(time.Second)))))
 
 	}
 

@@ -2,7 +2,7 @@ package main
 
 import (
 	"analyzer"
-	"common"
+	"fileutil"
 	"fmt"
 	"github.com/mgutz/ansi"
 	"io/ioutil"
@@ -86,6 +86,6 @@ func main() {
 		fmt.Printf("Elapsed: %s, TPS(Mail): %f, TPS(FileSize): %s\n",
 			time.Now().Sub(startTime),
 			float64(totalNum)/(float64(elapsed)/float64(time.Second)),
-			common.HumanReadableSize(uint64(float64(totalSize)/(float64(elapsed)/float64(time.Second)))))
+			fileutil.Humanize(uint64(float64(totalSize)/(float64(elapsed)/float64(time.Second)))))
 	}
 }

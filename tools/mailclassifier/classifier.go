@@ -2,7 +2,7 @@ package main
 
 import (
 	"analyzer"
-	"common"
+	"fileutil"
 	"fmt"
 	"github.com/mgutz/ansi"
 	"io/ioutil"
@@ -79,7 +79,7 @@ func main() {
 		}
 
 		if !dryRun {
-			common.CopyFile(filePath, moveTo)
+			fileutil.CopyFile(filePath, moveTo)
 		}
 
 		msg := fmt.Sprintf("%s %s\n", mail.Subject(), moveTo)

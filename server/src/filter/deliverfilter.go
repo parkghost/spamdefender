@@ -1,10 +1,10 @@
 package filter
 
 import (
-	"common"
 	metrics "github.com/rcrowley/go-metrics"
 	"log"
 	"mailfile"
+	"os"
 	"path/filepath"
 )
 
@@ -30,7 +30,7 @@ func (df *DeliverFilter) Filter(mail mailfile.Mail) Result {
 	destination := filepath.Join(df.paths[result], mail.Name())
 	log.Printf("Move to %s, Mail:%s\n", destination, mail.Name())
 
-	err := common.MoveFile(mail.Path(), destination)
+	err := os.Rename(mail.Path(), destination)
 	if err != nil {
 		log.Printf("DeliverFilter: Err:%v, Mail:%s\n", err, mail.Name())
 	}

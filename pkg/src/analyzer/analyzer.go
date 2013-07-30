@@ -2,13 +2,14 @@ package analyzer
 
 import (
 	"bytes"
-	"common"
 	"fmt"
 	"github.com/parkghost/bayesian"
 	"goseg"
 	"math"
+	"strings"
 	"sync"
 	"time"
+	"unicode/utf8"
 )
 
 const (
@@ -36,8 +37,19 @@ type BayesianAnalyzer struct {
 	rwm        *sync.RWMutex
 }
 
+func Normalize(words []string, cutset string) []string {
+	newWords := make([]string, 0, len(words))
+	for _, word := range words {
+		newWord := strings.ToLower(strings.Trim(word, cutset))
+		if utf8.RuneCountInString(newWord) > 1 {
+			newWords = append(newWords, newWord)
+		}
+	}
+	return newWords
+}
+
 func (ba *BayesianAnalyzer) Test(text string) string {
-	words := common.Normalize(ba.tokenizer.Cut([]rune(text)), cutset)
+	words := Normalize(ba.tokenizer.Cut([]rune(text)), cutset)
 
 	ba.rwm.RLock()
 	scores, likely, strict := ba.classifier.LogScores(words)
@@ -51,7 +63,7 @@ func (ba *BayesianAnalyzer) Test(text string) string {
 }
 
 func (ba *BayesianAnalyzer) Learn(text, class string) {
-	words := common.Normalize(ba.tokenizer.Cut([]rune(text)), cutset)
+	words := Normalize(ba.tokenizer.Cut([]rune(text)), cutset)
 
 	ba.rwm.Lock()
 	ba.classifier.Learn(words, bayesian.Class(class))
@@ -63,7 +75,7 @@ func (ba *BayesianAnalyzer) Learn(text, class string) {
 }
 
 func (ba *BayesianAnalyzer) Explain(text string) WordFreqList {
-	words := common.Normalize(ba.tokenizer.Cut([]rune(text)), cutset)
+	words := Normalize(ba.tokenizer.Cut([]rune(text)), cutset)
 
 	ba.rwm.RLock()
 	freqMatrix := ba.classifier.WordFrequencies(words)

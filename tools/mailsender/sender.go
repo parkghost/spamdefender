@@ -1,7 +1,7 @@
 package main
 
 import (
-	"common"
+	"fileutil"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -73,7 +73,7 @@ func main() {
 		totalNum,
 		time.Now().Sub(startTime),
 		float64(totalNum)/(float64(elapsed)/float64(time.Second)),
-		common.HumanReadableSize(uint64(float64(totalSize)/(float64(elapsed)/float64(time.Second)))))
+		fileutil.Humanize(uint64(float64(totalSize)/(float64(elapsed)/float64(time.Second)))))
 
 }
 

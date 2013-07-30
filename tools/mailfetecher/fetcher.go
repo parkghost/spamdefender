@@ -2,7 +2,7 @@ package main
 
 import (
 	"bytes"
-	"common"
+	"fileutil"
 	"fmt"
 	pop3 "github.com/bytbox/go-pop3"
 	"github.com/parkghost/pkg/net/mail"
@@ -65,7 +65,7 @@ func PrintMailBoxStat(client *pop3.Client) error {
 		return err
 	}
 
-	fmt.Printf("Account:%s, MailCount:%d, MailBoxSize:%s\n", username, mailCount, common.HumanReadableSize(uint64(mailBoxSize)))
+	fmt.Printf("Account:%s, MailCount:%d, MailBoxSize:%s\n", username, mailCount, fileutil.Humanize(uint64(mailBoxSize)))
 	return nil
 }
 
