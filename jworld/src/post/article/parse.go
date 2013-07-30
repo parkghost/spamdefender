@@ -66,7 +66,7 @@ loop:
 	}
 
 	if currentIdx != len(parsers)-1 {
-		err = errors.New("malformed email content")
+		err = errors.New("malformed Post format")
 	}
 
 	return

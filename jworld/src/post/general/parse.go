@@ -58,7 +58,7 @@ loop:
 	}
 
 	if currentIdx != len(parsers)-1 {
-		err = errors.New("malformed email content")
+		err = errors.New("malformed Post format")
 	}
 
 	return
@@ -102,12 +102,12 @@ type SenderParser struct {
 
 func (sp *SenderParser) Parse(newPost *post.Post, raw []byte) post.Flow {
 
-	// kind 0
-	//JWorld@TW, 回覆通知 => sender at line 2
+	// kind 0: sender at line 2
+	//JWorld@TW, 回覆通知
 
-	// kind 1
-	//JWorld@TW新話題通知:想請問這個Java Code那裡出錯了 => sender at line 3
-	//JWorld@TW話題更新通知 => sender at line 3
+	// kind 1: sender at line 3
+	//JWorld@TW新話題通知
+	//JWorld@TW話題更新通知
 
 	sp.count += 1
 

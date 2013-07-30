@@ -25,7 +25,7 @@ func (cif *ContentInspectionFilter) Filter(mail mailfile.Mail) Result {
 	mail.Close()
 	if err != nil {
 		cif.malformed.Inc(1)
-		log.Printf("ContentInspectionFilter: Err: %v, Mail:%s\n", err, mail.Path())
+		log.Printf("ContentInspectionFilter: Err:%v, Mail:%s\n", err, mail.Path())
 		return cif.next.Filter(mail)
 	}
 

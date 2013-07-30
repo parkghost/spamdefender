@@ -25,7 +25,7 @@ func (cih *ContentInspectionUpdater) Update(mail mailfile.Mail) {
 		mail.Close()
 		if err != nil {
 			cih.malformed.Inc(1)
-			log.Printf("ContentInspectionUpdater: Err: %v, Mail:%s\n", err, mail.Path())
+			log.Printf("ContentInspectionUpdater: Err:%v, Mail:%s\n", err, mail.Path())
 			return
 		}
 
