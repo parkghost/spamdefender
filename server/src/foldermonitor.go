@@ -39,8 +39,9 @@ loop:
 			}
 
 			for _, fi := range fis {
-				log.Println("Found Mail:", filepath.Join(m.folder, fi.Name()))
-				m.dispatcher.Dispatch(filepath.Join(m.folder, fi.Name()))
+				filePath := filepath.Join(m.folder, fi.Name())
+				log.Println("Found Mail:", filePath)
+				m.dispatcher.Dispatch(filePath)
 			}
 
 			if waiter, ok := m.dispatcher.(Waiter); ok {
