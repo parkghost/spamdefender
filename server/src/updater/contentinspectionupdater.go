@@ -3,9 +3,9 @@ package updater
 import (
 	"analyzer"
 	metrics "github.com/rcrowley/go-metrics"
-	"htmlutil"
 	"log"
 	"mailfile"
+	"mailpost"
 	"os"
 )
 
@@ -21,13 +21,16 @@ func (cih *ContentInspectionUpdater) Update(mail mailfile.Mail) {
 		log.Printf("Run %s, Mail:%s\n", cih, mail.Name())
 		cih.total.Inc(1)
 
-		content, err := htmlutil.ExtractText(mail.Content(), htmlutil.BannerRemover("----------", 0, 1))
+		post, err := mailpost.Parse(mail)
+		mail.Close()
 		if err != nil {
 			cih.malformed.Inc(1)
-			log.Printf("ContentInspectionUpdater: Err:%v, Mail:%s\n", err, mail.Name())
+			log.Printf("ContentInspectionUpdater: Err: %v, Mail:%s\n", err, mail.Path())
 			return
 		}
-		leaner.Learn(content, cih.class)
+
+		leaner.Learn(post.Subject, cih.class)
+		leaner.Learn(post.Content, cih.class)
 
 		err = os.Remove(mail.Path())
 		if err != nil {

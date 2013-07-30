@@ -5,10 +5,10 @@ import (
 	"common"
 	"fmt"
 	"github.com/mgutz/ansi"
-	"htmlutil"
 	"io/ioutil"
 	"log"
 	"mailfile"
+	"mailpost"
 	"os"
 	"time"
 )
@@ -61,11 +61,13 @@ func main() {
 				log.Fatal(err)
 			}
 
-			htmlText := mail.Content()
-			content, _ := htmlutil.ExtractText(htmlText, htmlutil.BannerRemover("----------", 0, 1))
+			post, err := mailpost.Parse(mail)
 			mail.Close()
+			if err != nil {
+				log.Fatalf("Err: %v, Mail:%s", err, mail.Path())
+			}
 
-			class := anlz.Test(content)
+			class := anlz.Test(post.Subject + " " + post.Content)
 
 			switch {
 			case analyzer.Neutral == class:

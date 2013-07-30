@@ -1,4 +1,4 @@
 #!/bin/bash
 # usage: . set_go_path.sh
 
-GOPATH="$PWD/vender:$PWD/pkg:$PWD/server" 
+GOPATH="$PWD/vender:$PWD/pkg:$PWD/jworld:$PWD/server" 

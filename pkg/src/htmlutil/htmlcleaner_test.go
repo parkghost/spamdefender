@@ -1,12 +1,40 @@
 package htmlutil
 
 import (
+	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 	"testing"
 )
 
 const ps = string(os.PathSeparator)
+
+func BannerRemover(lineSeparator string, skipTop int, skipBottom int) func(string) (string, error) {
+	return func(text string) (string, error) {
+
+		lines := strings.Split(text, "\n")
+
+		var pos []int
+		for no, line := range lines {
+			if strings.TrimRight(line, " ") == lineSeparator {
+				pos = append(pos, no)
+			}
+		}
+
+		if len(pos) == 0 {
+			return text, errors.New(fmt.Sprintf("html: cannot detect lineSeparator: %s", lineSeparator))
+		}
+
+		if len(pos) != 3 {
+			return text, errors.New("html: malformed mail content")
+		}
+
+		top, bottom := pos[skipTop], pos[len(pos)-skipBottom-1]
+		return strings.Join(lines[top+1:bottom-1], "\n"), nil
+	}
+}
 
 var testdata = struct {
 	original string

@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"github.com/parkghost/bayesian"
 	"goseg"
-	"htmlutil"
 	"io/ioutil"
 	"log"
 	"mailfile"
+	"mailpost"
 	"os"
 	"time"
 )
@@ -65,11 +65,13 @@ func main() {
 				log.Fatal(err)
 			}
 
-			htmlText := mail.Content()
-			content, _ := htmlutil.ExtractText(htmlText, htmlutil.BannerRemover("----------", 0, 1))
+			post, err := mailpost.Parse(mail)
 			mail.Close()
+			if err != nil {
+				log.Fatalf("Err: %v, Mail:%s", err, mail.Path())
+			}
 
-			words := common.Normalize(tokenizer.Cut([]rune(content)), cutset)
+			words := common.Normalize(tokenizer.Cut([]rune(post.Subject+" "+post.Content)), cutset)
 			classifier.Learn(words, item.class)
 			totalNum += 1
 		}

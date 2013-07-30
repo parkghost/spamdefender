@@ -5,6 +5,7 @@ badformat
 mailbox
 vender/pkg
 server/pkg
+jworld/pkg
 pkg/pkg
 data/*
 log/*

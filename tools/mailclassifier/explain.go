@@ -5,10 +5,10 @@ import (
 	"common"
 	"fmt"
 	"github.com/mgutz/ansi"
-	"htmlutil"
 	"io/ioutil"
 	"log"
 	"mailfile"
+	"mailpost"
 	"os"
 	"time"
 )
@@ -62,14 +62,14 @@ func main() {
 				log.Fatal(err)
 			}
 
-			htmlText := mail.Content()
-			content, err := htmlutil.ExtractText(htmlText, htmlutil.BannerRemover("----------", 0, 1))
-			if err != nil {
-				fmt.Println(err)
-			}
+			post, err := mailpost.Parse(mail)
 			mail.Close()
+			if err != nil {
+				log.Fatalf("Err: %v, Mail:%s", err, mail.Path())
+			}
 
-			class := anlz.Test(content)
+
+			class := anlz.Test(post.Subject + " " + post.Content)
 
 			color := ""
 			showInfo := false
@@ -91,7 +91,7 @@ func main() {
 				msg := fmt.Sprintf("%s, %s\n", mail.Subject(), mailFilePath)
 				fmt.Printf(ansi.Color(msg, color))
 				if explain {
-					fmt.Println(anlz.Explain(content))
+					fmt.Println(anlz.Explain(post.Subject + " " + post.Content))
 				}
 			}
 

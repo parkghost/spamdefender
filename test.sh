@@ -9,6 +9,11 @@ pushd pkg >/dev/null
 go test -v "./..."
 popd >/dev/null
 
+echo "testing jworld"
+pushd jworld >/dev/null
+go test -v "./..."
+popd >/dev/null
+
 # no tests, but a build is something
 echo "build server"
 pushd server/src >/dev/null

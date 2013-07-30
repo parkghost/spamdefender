@@ -3,10 +3,10 @@ package main
 import (
 	"bufio"
 	"goseg"
-	"htmlutil"
 	"io/ioutil"
 	"log"
 	"mailfile"
+	"mailpost"
 	"os"
 	"sort"
 	"strconv"
@@ -57,11 +57,14 @@ func main() {
 				log.Fatal(err)
 			}
 
-			htmlText := mail.Content()
-			content, _ := htmlutil.ExtractText(htmlText, htmlutil.BannerRemover("----------", 0, 1))
+			post, err := mailpost.Parse(mail)
 			mail.Close()
+			if err != nil {
+				log.Fatalf("Err: %v, Mail:%s", err, mail.Path())
+			}
 
-			words := tokenizer.Cut([]rune(content))
+
+			words := tokenizer.Cut([]rune(post.Subject + " " + post.Content))
 
 			for _, word := range words {
 				key := strings.Trim(word, cutset)

@@ -3,9 +3,9 @@ package filter
 import (
 	"analyzer"
 	metrics "github.com/rcrowley/go-metrics"
-	"htmlutil"
 	"log"
 	"mailfile"
+	"mailpost"
 )
 
 type ContentInspectionFilter struct {
@@ -21,14 +21,15 @@ func (cif *ContentInspectionFilter) Filter(mail mailfile.Mail) Result {
 	log.Printf("Run %s, Mail:%s\n", cif, mail.Name())
 	cif.total.Inc(1)
 
-	content, err := htmlutil.ExtractText(mail.Content(), htmlutil.BannerRemover("----------", 0, 1))
+	post, err := mailpost.Parse(mail)
+	mail.Close()
 	if err != nil {
 		cif.malformed.Inc(1)
-		log.Printf("ContentInspectionFilter: Err:%v, Mail:%s\n", err, mail.Name())
+		log.Printf("ContentInspectionFilter: Err: %v, Mail:%s\n", err, mail.Path())
 		return cif.next.Filter(mail)
 	}
 
-	class := cif.anlz.Test(content)
+	class := cif.anlz.Test(post.Subject + " " + post.Content)
 	cif.counters[class].Inc(1)
 	if cif.allPass || analyzer.Good == class {
 		return cif.next.Filter(mail)
