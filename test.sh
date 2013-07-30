@@ -23,10 +23,14 @@ popd >/dev/null
 
 echo "build tools"
 pushd tools >/dev/null
+
+echo "build tools/databuilder"
+pushd databuilder >/dev/null
 go build testing.go 
 go build training.go 
-go build builddictionarydata.go
+go build builddictdata.go
 go clean
+popd >/dev/null 
 
 echo "build tools/mailfetcher"
 pushd mailfetecher >/dev/null
@@ -48,4 +52,5 @@ pushd mailsender >/dev/null
 go build sender.go
 go clean
 popd >/dev/null
+
 popd >/dev/null 

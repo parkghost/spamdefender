@@ -7,8 +7,8 @@ import (
 )
 
 var (
-	dictFilePath     = filepath.Join("..", "conf", "dict.txt")
-	dictDataFilePath = filepath.Join("..", "data", "dict.data")
+	dictFilePath     = filepath.Join("conf", "dict.txt")
+	dictDataFilePath = "dict.data"
 )
 
 func main() {

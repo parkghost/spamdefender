@@ -15,16 +15,16 @@ import (
 
 var (
 	confident           = 0.01
-	dictDataFilePath    = filepath.Join("..", "data", "dict.data")
-	traningDataFilePath = filepath.Join("..", "data", "bayesian.data")
+	dictDataFilePath    = "dict.data"
+	traningDataFilePath = "bayesian.data"
 )
 
 var testData = []struct {
 	folder string
 	class  string
 }{
-	{filepath.Join("..", "data", "test", "good"), analyzer.Good},
-	{filepath.Join("..", "data", "test", "bad"), analyzer.Bad},
+	{filepath.Join("data", "test", "good"), analyzer.Good},
+	{filepath.Join("data", "test", "bad"), analyzer.Bad},
 }
 
 func main() {

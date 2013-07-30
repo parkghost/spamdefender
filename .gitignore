@@ -10,6 +10,7 @@ pkg/pkg
 data/*
 log/*
 bin/*
+testdata/*
 .hg
 
 *.data

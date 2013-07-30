@@ -16,7 +16,7 @@ import (
 
 var (
 	//queuesFolder = "/var/spool/postfix/"
-	queuesFolder     = filepath.Join("data", "fakeQueues")
+	queuesFolder     = filepath.Join("testdata", "fakeQueues")
 	holdFolder       = filepath.Join(queuesFolder, "hold")
 	quarantineFolder = filepath.Join(queuesFolder, "quarantine")
 	incomingFolder   = filepath.Join(queuesFolder, "incoming")

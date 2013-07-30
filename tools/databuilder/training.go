@@ -21,16 +21,16 @@ var (
 )
 
 var (
-	dictDataFilePath = filepath.Join("..", "data", "dict.data")
-	output           = filepath.Join("..", "data", "bayesian.data")
+	dictDataFilePath = "dict.data"
+	output           = "bayesian.data"
 )
 
 var trainingData = []struct {
 	folder string
 	class  bayesian.Class
 }{
-	{filepath.Join("..", "data", "training", "good"), Good},
-	{filepath.Join("..", "data", "training", "bad"), Bad},
+	{filepath.Join("data", "training", "good"), Good},
+	{filepath.Join("data", "training", "bad"), Bad},
 }
 
 func main() {

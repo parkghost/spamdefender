@@ -88,7 +88,6 @@ func CheckAndDownloadMailContent(client *pop3.Client, index int) (err error) {
 	if _, errFileStat := os.Stat(filePath); errFileStat != nil { // mail file not found
 
 		log.Printf("Downloading Mail:%d", index)
-		// TODO: handle non-utf8 encoding
 		// THINK: check content integrity
 		var mailContent string
 		mailContent, err = client.Retr(index)
