@@ -3,14 +3,12 @@ package main
 import (
 	"goseg"
 	"log"
-	"os"
+	"path/filepath"
 )
 
-const ps = string(os.PathSeparator)
-
 var (
-	dictFilePath     = ".." + ps + "conf" + ps + "dict.txt"
-	dictDataFilePath = ".." + ps + "data" + ps + "dict.data"
+	dictFilePath     = filepath.Join("..", "conf", "dict.txt")
+	dictDataFilePath = filepath.Join("..", "data", "dict.data")
 )
 
 func main() {

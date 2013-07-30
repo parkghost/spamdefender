@@ -5,6 +5,7 @@ import (
 	metrics "github.com/rcrowley/go-metrics"
 	"log"
 	"mailfile"
+	"path/filepath"
 )
 
 type DeliverFilter struct {
@@ -26,7 +27,7 @@ func (df *DeliverFilter) Filter(mail mailfile.Mail) Result {
 		log.Fatalf("DeliverFilter: the filter result should not be None, Mail:%s\n", mail.Name())
 	}
 
-	destination := df.paths[result] + ps + mail.Name()
+	destination := filepath.Join(df.paths[result], mail.Name())
 	log.Printf("Move to %s, Mail:%s\n", destination, mail.Name())
 
 	err := common.MoveFile(mail.Path(), destination)

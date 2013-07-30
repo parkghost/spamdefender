@@ -9,15 +9,13 @@ import (
 	"log"
 	"mailfile"
 	"mailpost"
-	"os"
+	"path/filepath"
 	"time"
 )
 
-const ps = string(os.PathSeparator)
-
 var (
 	explain             = true
-	dictDataFilePath    = ".." + ps + ".." + ps + "data" + ps + "dict.data"
+	dictDataFilePath    = filepath.Join("..", "..", "data", "dict.data")
 	traningDataFilePath = "bayesian.data"
 )
 
@@ -56,7 +54,7 @@ func main() {
 			totalSize += fi.Size()
 			totalNum += 1
 
-			mailFilePath := item.folder + ps + fi.Name()
+			mailFilePath := filepath.Join(item.folder, fi.Name())
 			mail := mailfile.NewPOP3Mail(mailFilePath)
 			if err = mail.Parse(); err != nil {
 				log.Fatal(err)
@@ -67,7 +65,6 @@ func main() {
 			if err != nil {
 				log.Fatalf("Err: %v, Mail:%s", err, mail.Path())
 			}
-
 
 			class := anlz.Test(post.Subject + " " + post.Content)
 

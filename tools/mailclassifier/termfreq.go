@@ -8,12 +8,11 @@ import (
 	"mailfile"
 	"mailpost"
 	"os"
+	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 )
-
-const ps = string(os.PathSeparator)
 
 var allData = []struct {
 	folder string
@@ -28,7 +27,7 @@ var (
 
 	termMinLength    = 1
 	topTermRatio     = 0.90
-	dictDataFilePath = ".." + ps + ".." + ps + "data" + ps + "dict.data"
+	dictDataFilePath = filepath.Join("..", "..", "data", "dict.data")
 )
 
 func main() {
@@ -51,7 +50,7 @@ func main() {
 				continue
 			}
 
-			filePath := item.folder + string(os.PathSeparator) + fi.Name()
+			filePath := filepath.Join(item.folder, fi.Name())
 			mail := mailfile.NewPOP3Mail(filePath)
 			if err = mail.Parse(); err != nil {
 				log.Fatal(err)
@@ -62,7 +61,6 @@ func main() {
 			if err != nil {
 				log.Fatalf("Err: %v, Mail:%s", err, mail.Path())
 			}
-
 
 			words := tokenizer.Cut([]rune(post.Subject + " " + post.Content))
 

@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path/filepath"
 	"strconv"
 )
 
@@ -83,7 +84,7 @@ func ScanMailbox(client *pop3.Client) error {
 }
 
 func CheckAndDownloadMailContent(client *pop3.Client, index int) (err error) {
-	filePath := destination + string(os.PathSeparator) + strconv.Itoa(index)
+	filePath := filepath.Join(destination, strconv.Itoa(index))
 	if _, errFileStat := os.Stat(filePath); errFileStat != nil { // mail file not found
 
 		log.Printf("Downloading Mail:%d", index)

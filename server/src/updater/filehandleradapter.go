@@ -5,7 +5,7 @@ import (
 	"log"
 	"mailfile"
 	"os"
-	"path"
+	"path/filepath"
 )
 
 type FileHandlerAdapter struct {
@@ -23,7 +23,7 @@ func (fha *FileHandlerAdapter) Handle(filePath string) {
 		mail := fha.factory.Create(filePath)
 
 		if err = mail.Parse(); err != nil {
-			_, mailName := path.Split(filePath)
+			_, mailName := filepath.Split(filePath)
 			log.Printf("FileHandlerAdapter: Err:%v, Mail:%s\n", err, mailName)
 			return
 		}

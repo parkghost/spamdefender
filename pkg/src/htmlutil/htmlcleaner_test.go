@@ -5,11 +5,10 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
-
-const ps = string(os.PathSeparator)
 
 func BannerRemover(lineSeparator string, skipTop int, skipBottom int) func(string) (string, error) {
 	return func(text string) (string, error) {
@@ -40,8 +39,8 @@ var testdata = struct {
 	original string
 	expected string
 }{
-	"testdata" + ps + "original",
-	"testdata" + ps + "expected",
+	filepath.Join("testdata", "original"),
+	filepath.Join("testdata", "expected"),
 }
 
 func TestExtractText(t *testing.T) {

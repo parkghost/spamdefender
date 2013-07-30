@@ -9,24 +9,22 @@ import (
 	"log"
 	"mailfile"
 	"mailpost"
-	"os"
+	"path/filepath"
 	"time"
 )
 
-const ps = string(os.PathSeparator)
-
 var (
 	confident           = 0.01
-	dictDataFilePath    = ".." + ps + "data" + ps + "dict.data"
-	traningDataFilePath = ".." + ps + "data" + ps + "bayesian.data"
+	dictDataFilePath    = filepath.Join("..", "data", "dict.data")
+	traningDataFilePath = filepath.Join("..", "data", "bayesian.data")
 )
 
 var testData = []struct {
 	folder string
 	class  string
 }{
-	{".." + ps + "data" + ps + "test" + ps + "good", string(analyzer.Good)},
-	{".." + ps + "data" + ps + "test" + ps + "bad", string(analyzer.Bad)},
+	{filepath.Join("..", "data", "test", "good"), analyzer.Good},
+	{filepath.Join("..", "data", "test", "bad"), analyzer.Bad},
 }
 
 func main() {
@@ -55,7 +53,7 @@ func main() {
 			totalSize += fi.Size()
 			totalNum += 1
 
-			mailFilePath := item.folder + ps + fi.Name()
+			mailFilePath := filepath.Join(item.folder, fi.Name())
 			mail := mailfile.NewPOP3Mail(mailFilePath)
 			if err = mail.Parse(); err != nil {
 				log.Fatal(err)

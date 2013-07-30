@@ -3,11 +3,9 @@ package main
 import (
 	"io/ioutil"
 	"log"
-	"os"
+	"path/filepath"
 	"time"
 )
-
-const ps = string(os.PathSeparator)
 
 type FolderMonitor struct {
 	folder     string
@@ -41,8 +39,8 @@ loop:
 			}
 
 			for _, fi := range fis {
-				log.Println("Found Mail:", m.folder+ps+fi.Name())
-				m.dispatcher.Dispatch(m.folder + ps + fi.Name())
+				log.Println("Found Mail:", filepath.Join(m.folder, fi.Name()))
+				m.dispatcher.Dispatch(filepath.Join(m.folder, fi.Name()))
 			}
 
 			if waiter, ok := m.dispatcher.(Waiter); ok {

@@ -7,10 +7,8 @@ import (
 	"goseg"
 	"io/ioutil"
 	"log"
-	"os"
+	"path/filepath"
 )
-
-const ps = string(os.PathSeparator)
 
 var (
 	Good   bayesian.Class = "Good"
@@ -19,7 +17,7 @@ var (
 )
 
 var (
-	dictDataFilePath = ".." + ps + ".." + ps + "data" + ps + "dict.data"
+	dictDataFilePath = filepath.Join("..", "..", "data", "dict.data")
 	output           = "bayesian.data"
 )
 

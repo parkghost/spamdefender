@@ -3,7 +3,7 @@ package mailfile
 import (
 	"io"
 	"io/ioutil"
-	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -15,8 +15,8 @@ type Testdata struct {
 }
 
 var pop3Testdata = Testdata{
-	"testdata" + string(os.PathSeparator) + "pop3",
-	"testdata" + string(os.PathSeparator) + "pop3_plaintext",
+	filepath.Join("testdata", "pop3"),
+	filepath.Join("testdata", "pop3_plaintext"),
 }
 
 func TestPOP3RetrieveSubject(t *testing.T) {

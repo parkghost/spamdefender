@@ -9,18 +9,16 @@ import (
 	"log"
 	"mailfile"
 	"mailpost"
-	"os"
+	"path/filepath"
 )
-
-const ps = string(os.PathSeparator)
 
 var (
 	cutset = ":;=<>"
 
 	confident           = 0.01
 	dryRun              = false
-	mailbox             = ".." + ps + "mailfetecher" + ps + "mailbox"
-	dictDataFilePath    = ".." + ps + ".." + ps + "data" + ps + "dict.data"
+	mailbox             = filepath.Join("..", "mailfetecher", "mailbox")
+	dictDataFilePath    = filepath.Join("..", "..", "data", "dict.data")
 	traningDataFilePath = "bayesian.data"
 )
 
@@ -43,7 +41,7 @@ func main() {
 		}
 		totalNum += 1
 
-		filePath := mailbox + ps + fi.Name()
+		filePath := filepath.Join(mailbox, fi.Name())
 		mail := mailfile.NewPOP3Mail(filePath)
 		if err = mail.Parse(); err != nil {
 			log.Fatal(err)
@@ -55,13 +53,12 @@ func main() {
 			log.Printf("Err: %v, Mail:%s\n", err, mail.Path())
 		}
 
-
 		color := ""
 		moveTo := ""
 
 		if err != nil {
 			badformats += 1
-			moveTo = "badformat" + ps + fi.Name()
+			moveTo = filepath.Join("badformat", fi.Name())
 		} else {
 			class := anlz.Test(post.Subject + " " + post.Content)
 
@@ -69,15 +66,15 @@ func main() {
 			case analyzer.Neutral:
 				neutrals += 1
 				color = "cyan+b"
-				moveTo = "neutral" + ps + fi.Name()
+				moveTo = filepath.Join("neutral", fi.Name())
 			case analyzer.Good:
 				goods += 1
 				color = "green+b"
-				moveTo = "good" + ps + fi.Name()
+				moveTo = filepath.Join("good", fi.Name())
 			case analyzer.Bad:
 				bads += 1
 				color = "red+b"
-				moveTo = "bad" + ps + fi.Name()
+				moveTo = filepath.Join("bad", fi.Name())
 			}
 		}
 

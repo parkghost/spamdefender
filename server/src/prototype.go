@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"postfix"
 	"runtime"
 	"time"
@@ -15,17 +16,17 @@ import (
 
 var (
 	//queuesFolder = "/var/spool/postfix/"
-	queuesFolder     = "data" + ps + "fakeQueues" + ps
-	holdFolder       = queuesFolder + "hold"
-	quarantineFolder = queuesFolder + "quarantine"
-	incomingFolder   = queuesFolder + "incoming"
+	queuesFolder     = filepath.Join("data", "fakeQueues")
+	holdFolder       = filepath.Join(queuesFolder, "hold")
+	quarantineFolder = filepath.Join(queuesFolder, "quarantine")
+	incomingFolder   = filepath.Join(queuesFolder, "incoming")
 
-	traningDataFilePath = "data" + ps + "bayesian.data"
-	dictDataFilePath    = "data" + ps + "dict.data"
+	traningDataFilePath = filepath.Join("data", "bayesian.data")
+	dictDataFilePath    = filepath.Join("data", "dict.data")
 	updateDelay         = time.Duration(5) * time.Second
 
-	hamFolder  = "data" + ps + "received" + ps + "good"
-	spamFolder = "data" + ps + "received" + ps + "bad"
+	hamFolder  = filepath.Join("data", "received", "good")
+	spamFolder = filepath.Join("data", "received", "bad")
 
 	allPass         = false
 	subjectPrefixes = []string{"JWorld@TW新話題通知"}
@@ -40,9 +41,9 @@ var (
 	flushTimeout = time.Duration(5) * time.Second
 
 	logsFolder             = "log"
-	metricLog              = logsFolder + ps + "metrics.log"
+	metricLog              = filepath.Join(logsFolder, "metrics.log")
 	writeMetricLogInterval = time.Duration(10) * time.Second
-	spamdefenderLog        = logsFolder + ps + "spamdefender.log"
+	spamdefenderLog        = filepath.Join(logsFolder, "spamdefender.log")
 )
 
 func main() {

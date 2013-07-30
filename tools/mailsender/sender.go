@@ -6,16 +6,14 @@ import (
 	"io/ioutil"
 	"log"
 	"net/smtp"
-	"os"
+	"path/filepath"
 	"strconv"
 	"sync"
 	"time"
 )
 
-const ps = string(os.PathSeparator)
-
 var (
-	folder      = ".." + ps + "mailfetecher" + ps + "mailbox"
+	folder      = filepath.Join("..", "mailfetecher", "mailbox")
 	recipient   = "alice@labs.brandonc.me"
 	from        = "brandon@labs.brandonc.me"
 	user        = "*"
@@ -53,7 +51,7 @@ func main() {
 		totalSize += fi.Size()
 		totalNum += 1
 
-		filePath := folder + string(os.PathSeparator) + fi.Name()
+		filePath := filepath.Join(folder, fi.Name())
 		rawBody, err := ioutil.ReadFile(filePath)
 		checkErr(err)
 

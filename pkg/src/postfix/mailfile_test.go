@@ -4,7 +4,7 @@ import (
 	"io"
 	"io/ioutil"
 	"mailfile"
-	"os"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"testing"
@@ -16,8 +16,8 @@ type Testdata struct {
 }
 
 var postfixTestdata = Testdata{
-	"testdata" + string(os.PathSeparator) + "postfix",
-	"testdata" + string(os.PathSeparator) + "postfix_plaintext",
+	filepath.Join("testdata", "postfix"),
+	filepath.Join("testdata", "postfix_plaintext"),
 }
 
 func TestPostfixRetrieveSubject(t *testing.T) {

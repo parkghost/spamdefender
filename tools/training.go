@@ -9,11 +9,9 @@ import (
 	"log"
 	"mailfile"
 	"mailpost"
-	"os"
+	"path/filepath"
 	"time"
 )
-
-const ps = string(os.PathSeparator)
 
 var (
 	Good   bayesian.Class = "Good"
@@ -22,16 +20,16 @@ var (
 )
 
 var (
-	dictDataFilePath = ".." + ps + "data" + ps + "dict.data"
-	output           = ".." + ps + "data" + ps + "bayesian.data"
+	dictDataFilePath = filepath.Join("..", "data", "dict.data")
+	output           = filepath.Join("..", "data", "bayesian.data")
 )
 
 var trainingData = []struct {
 	folder string
 	class  bayesian.Class
 }{
-	{".." + ps + "data" + ps + "training" + ps + "good", Good},
-	{".." + ps + "data" + ps + "training" + ps + "bad", Bad},
+	{filepath.Join("..", "data", "training", "good"), Good},
+	{filepath.Join("..", "data", "training", "bad"), Bad},
 }
 
 func main() {
@@ -59,7 +57,7 @@ func main() {
 			}
 			totalSize += fi.Size()
 
-			filePath := item.folder + string(os.PathSeparator) + fi.Name()
+			filePath := filepath.Join(item.folder, fi.Name())
 			mail := mailfile.NewPOP3Mail(filePath)
 			if err = mail.Parse(); err != nil {
 				log.Fatal(err)
